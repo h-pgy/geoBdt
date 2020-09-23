@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_restx import Resource, Api
-from os import listdir
 from random import choice
 import json
 
@@ -13,12 +12,10 @@ ns = api.namespace('BDT', description='Endpoint para gerar o BDT')
 
 def bdt_aleatorio():
 
-    file = choice(['data/' + file for file in listdir('data')])
-
-    with open(file) as f:
+    with open('data/bdts_json.json') as f:
         t = f.read()
 
-    return json.loads(t)
+    return choice(json.loads(t))
 
 @ns.route('/geoBdt')
 class GeoBdt(Resource):
