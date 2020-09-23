@@ -2,6 +2,7 @@ from flask import Flask
 from flask_restx import Resource, Api
 from os import listdir
 from random import choice
+import json
 
 app = Flask(__name__)
 api = Api(app, version='0.1', title='GeoBDT Mock API',
@@ -17,11 +18,15 @@ def bdt_aleatorio():
     with open(file) as f:
         t = f.read()
 
-    return t
+    return json.loads(t)
 
 @ns.route('/geoBdt')
 class GeoBdt(Resource):
     def post(self):
+
+        return bdt_aleatorio()
+
+    def get(self):
 
         return bdt_aleatorio()
 
