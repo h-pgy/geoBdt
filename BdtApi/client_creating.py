@@ -6,12 +6,6 @@ from zeep import Settings
 import functools
 from config import p_pwd_cac,p_usr_cac, wsdl_path_intra
 
-auth_headers = {
-    'p_pwd_cac': p_pwd_cac,
-    'p_usr_cac': p_usr_cac,
-    'IdTransacao': 'BDT'
-}
-
 
 def create_client_intranet(auth_headers, wsdl_path_intra):
     '''Creates client for working in PMSP intranet envirnoment.
@@ -33,9 +27,15 @@ def create_client_intranet(auth_headers, wsdl_path_intra):
                     settings=settings)
     return client
 
+auth_headers = {
+    'p_pwd_cac': p_pwd_cac,
+    'p_usr_cac': p_usr_cac,
+    'IdTransacao': 'BDT'
+}
 
 def create_client(auth_headers=auth_headers,
-                  create_client_function=create_client_intranet):
+                  create_client_function=create_client_intranet,
+                  wsdl_path = wsdl_path_intra):
     '''Decorator to create soap client. The auth headers and create client function
     parameters should be changed in order to use module in other environments. The
     default parameters are for working inside PMSP intranet on homolog env'''
@@ -43,7 +43,7 @@ def create_client(auth_headers=auth_headers,
     def create_client_decor(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            client = create_client_function(auth_headers, wsdl_path_intra)
+            client = create_client_function(auth_headers, wsdl_path)
 
             result = func(*args, client=client, **kwargs)
 
