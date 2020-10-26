@@ -43,7 +43,9 @@ def create_client(auth_headers=auth_headers,
     def create_client_decor(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            client = create_client_function(auth_headers, wsdl_path)
+
+            self = args[0]
+            client =self.client or create_client_function(auth_headers, wsdl_path)
 
             result = func(*args, client=client, **kwargs)
 
