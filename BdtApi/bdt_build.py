@@ -237,6 +237,41 @@ class ApiBdtBuilder:
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
 
+    @property
+    def historico_contaminacao(self):
+
+        resp = self.api.consult_processo_contaminacao(self.setor, self.quadra, self.lote)
+
+        #a webservice nao diferencia SQL invalido de SQL que nao possui processos!
+
+        if resp['Processos'] is None:
+            return build_response('Processos de contaminação',
+                                  'Identifica se há processos de contaminação para o SQL solicitado. '
+                                  'ATENÇÃO: a webservice não valida se o SQL solicitado é válido',
+                                  False)
+        elif resp['Processos']:
+            full_resp = []
+            for proc in resp['Processos']['ProcessoContaminacao_Retorno']:
+                proc_resp = [build_response('Contaminante',
+                                            'Identifica o contaminante avaliado no processo',
+                                            proc['Contaminante']),
+                             build_response('Etapa do processo',
+                                            'Identifica a etapa em que o processo de contaminação se encontra',
+                                            proc['Etapa']),
+                             build_response('Restrição de uso',
+                                            'Descreve se há alguma restrição de uso no imóvel devido à contaminação',
+                                            proc['RestricaoUso']),
+                             build_response('Situação da área',
+                                            'Identifica qual a situação atual da área. '
+                                            'Por exemplo: se ainda está contaminada, se já foi recuperada etc..',
+                                            proc['Situacao'])
+                             ]
+
+                full_resp.append(proc_resp)
+
+            return full_resp
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
 
 
 
