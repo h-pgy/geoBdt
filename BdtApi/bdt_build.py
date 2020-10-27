@@ -178,11 +178,7 @@ class ApiBdtBuilder:
 
                     full_resp.append(obj_resp)
 
-            #unpacking in case there's only one register
-            if len(full_resp) == 1:
-                return full_resp[0]
-            else:
-                return full_resp
+            return full_resp
 
     @property
     def area_protecao_ambiental(self):
@@ -312,11 +308,7 @@ class ApiBdtBuilder:
 
                 tombamentos.append(tomb)
 
-            #unpacking if there's only one
-            if len(tombamentos) == 1:
-                return tombamentos[0]
-            else:
-                return tombamentos
+            return tombamentos
 
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
