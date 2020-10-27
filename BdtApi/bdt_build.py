@@ -1,0 +1,250 @@
+from .get_api_data import ApiDataGetter
+from .proj_errors import SQLNotFound
+from .helpers import build_response
+
+
+class ApiBdtBuilder:
+
+    def __init__(self, setor, quadra, lote, digito, data_getter = None):
+
+        if data_getter is None:
+            self.api = ApiDataGetter()
+        self.setor = setor
+        self.quadra = quadra
+        self.lote = lote
+        self.digito = digito
+
+    @property
+    def area_manancial(self):
+
+        resp = self.api.consult_mananc_prox(self.setor, self.quadra)
+
+        if resp['Resultado'] == 'SIM':
+
+            return [
+                build_response('Incide área de manancial',
+                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                               True
+                               ),
+                build_response('Nome',
+                               'Identificação do manancial em que a quadra incide',
+                               resp['Nome']
+                               )
+            ]
+        elif resp['Resultado'] == 'NÃO':
+            return build_response('Incide área de manancial',
+                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                               False
+                               )
+
+        elif resp['Resultado'] is None:
+            raise SQLNotFound('A quadra não foi encontrada')
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def operacao_urbana(self):
+
+        resp = self.api.consult_operacao_urb(self.setor, self.quadra)
+
+        if resp['Resultado'] == 'SIM':
+
+            return [
+                build_response('Incide operação urbana',
+                               'Se há incidência de operação urbana no projeto',
+                               True),
+                build_response('Nome da Operação Urbana',
+                               'Nome da operação urbana que incide no projeto',
+                               resp['Nome']),
+                build_response('Setor',
+                               'Identificação do setor da operação urbana que incide no projeto',
+                               resp['Setor'])
+            ]
+
+        elif resp['Resultado'] == 'NÃO':
+
+            return build_response('Incide operação urbana',
+                               'Se há incidência de operação urbana no projeto',
+                               False)
+
+        elif resp['Resultado'] is None:
+
+            raise SQLNotFound('A quadra não foi encontrada')
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def hidrografia(self):
+
+        resp = self.api.prox_hidrografia(self.setor, self.quadra)
+
+        if resp == 'SIM':
+            return build_response('Próximo a hidrografia',
+                                  'Indica se o projeto está próximo a corpo de água/hidrografia',
+                                  True)
+        elif resp == 'Não':
+            return build_response('Próximo a hidrografia',
+                                  'Indica se o projeto está próximo a corpo de água/hidrografia',
+                                  False)
+        elif resp is None:
+
+            raise SQLNotFound('A quadra não foi encontrada')
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def dis_dup(self):
+
+        resp = self.api.consult_dup_dis(self.setor, self.quadra)
+
+        if resp['Resultado'] == 'SIM':
+            return [
+                build_response('Incidência de DUP ou DIS',
+                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                               ' sobre a quadra em que se localiza o projeto',
+                               True),
+                build_response('Tipo da Norma',
+                               'Indica se o decreto é de "interesse público" (DIS) ou "utilidade pública" (DUP)',
+                               resp['Tipo']
+                               ),
+                build_response('Número',
+                               'Numeração identificadora da norma',
+                               resp['Numero']),
+                build_response('Ano',
+                               'Ano de publicação da norma',
+                               int(resp['Data'][:4]))
+            ]
+
+        elif resp['Resultado'] == 'NÃO':
+            return build_response('Incidência de DUP ou DIS',
+                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                               ' sobre a quadra em que se localiza o projeto',
+                               False)
+
+        elif resp['Resultado'] is None:
+
+            raise SQLNotFound('A quadra não foi encontrada')
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def melhoramento_viario(self):
+        #to do: maybe reduce the size of this funcion with a helper
+
+        resp = self.api.consult_melhor_viario(self.setor, self.quadra)
+
+        lista_melhor = resp['ArrayOfMelhoramentoViarioMelhoramentoViario']
+
+        if not lista_melhor:
+            raise SQLNotFound('A quadra não foi encontrada')
+        elif type(lista_melhor) is not list:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+        #then there's a result that should be parsed
+        else:
+            full_resp = []
+            for obj in lista_melhor:
+                if obj['Resultado'] == 'NÃO':
+                    obj_resp = [
+                        build_response('Incidência de melhoramento viário',
+                                       'Indica se há incidência de melhoramento viário ou faixa não edificável'
+                                       'na quadra em que se situa o projeto',
+                                       False),
+                        build_response('Tipo de melhoramento',
+                                       'Identifica o tipo de melhoramento (viário ou faixa não edificável)',
+                                       obj['MelhoramentoFaixa'])
+                    ]
+                    full_resp.append(obj_resp)
+                elif obj['Resultado'] == 'SIM':
+                    obj_resp = [
+                        build_response('Incidência de melhoramento viário',
+                                       'Indica se há incidência de melhoramento viário ou faixa não edificável'
+                                       'na quadra em que se situa o projeto',
+                                       True),
+                        build_response('Tipo de melhoramento',
+                                       'Identifica o tipo de melhoramento (viário ou faixa não edificável)',
+                                       obj['MelhoramentoFaixa']),
+                        build_response('Ano da norma',
+                                       'Ano de publicação da norma que fundamenta o melhoramento viário',
+                                       obj['AnoLeiMelhoramentoVigente']),
+                        build_response('Tipo da norma',
+                                       'Identifica o tipo da norma que fundamenta o melhoramento viário',
+                                       obj['IdentificadorTipoNorma']),
+
+                    ]
+
+                    full_resp.append(obj_resp)
+
+            #unpacking in case there's only one register
+            if len(full_resp) == 1:
+                return full_resp[0]
+            else:
+                return full_resp
+
+    @property
+    def area_protecao_ambiental(self):
+
+        resp = self.api.consult_protec_ambient(self.setor, self.quadra)
+
+        if resp is None:
+
+            raise SQLNotFound('A quadra não foi encontrada')
+        elif resp == 'NÃO':
+
+            return build_response('Área de proteção ambiental',
+                                  'Identifica se a quadra em que se encontra o projeto se localiza'
+                                  ' em área de proteção ambiental',
+                                  False)
+        elif resp == 'SIM':
+
+            return build_response('Área de proteção ambiental',
+                                  'Identifica se a quadra em que se encontra o projeto se localiza'
+                                  ' em área de proteção ambiental',
+                                  True)
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def restricao_geotecnica(self):
+
+        resp = self.api.consult_restr_geotec(self.setor, self.quadra)
+
+        if resp['Resultado'] is None:
+            raise SQLNotFound('A quadra não foi encontrada')
+
+        elif resp['Resultado'] == 'NÃO':
+            return build_response('Restrição Geotécnica',
+                                  'Indica se a quadra onde se situa o projeto '
+                                  'está localizada em área de restrição geotécnica',
+                                  False)
+        elif resp['Resultado'] == 'SIM':
+            return [build_response('Restrição Geotécnica',
+                                  'Indica se a quadra onde se situa o projeto '
+                                  'está localizada em área de restrição geotécnica',
+                                  True),
+                    build_response('Área de restrição geotécnica',
+                                   'Identificação da área de restrição geotécnica'
+                                   ' em que se encontra o projeto',
+                                   resp['NomeLocal']),
+                    build_response('Regulamentação',
+                                   'Normativa que regulamenta a área de restrição geotécnica identificada',
+                                   resp['TextoRegulamentacao'])
+            ]
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+
+
+
+
+
+
+
+
+
+
+
