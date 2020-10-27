@@ -273,6 +273,56 @@ class ApiBdtBuilder:
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
 
+    @property
+    def tombamentos(self):
+
+        resp = self.api.consult_tombamentos(self.setor, self.quadra, self.lote, self.digito)
+
+        #a webservice nao diferencia SQL invalido de SQL que nao possui processos!
+
+        if resp is None:
+            return build_response('Tombamentos/Patrimônio Histórico',
+                                  'Identifica se o imóvel em que se situa o projeto está protegido pelo Patrimônio Histórico. '
+                                  'ATENÇÃO: a webservice não valida se o SQL solicitado é válido',
+                                  False)
+        elif type(resp) is list:
+
+            tombamentos = []
+            for tomb_resp in resp:
+                tomb = [
+                    build_response('Código do nível de preservação',
+                                   'Código que identifica o nível de preservação do imóvel pelo patrimônio histórico.',
+                                   tomb_resp['CodigoNivelPreservacao']),
+                    build_response('Descrição da preservação',
+                                   'Descreve o tipo de preservação do imóvel pelo patrimônio histórico',
+                                   tomb_resp['NivelPreservacao']),
+                    build_response('Data de atualização',
+                                   'Data da última atualização das informações sobre o tombamento',
+                                   resp['DataAtualizacao'][:10]),
+                    build_response('Data de cadastro',
+                                   'Data do cadastro do tombamento',
+                                   resp['DataCadastro'][:10]),
+                    build_response('Endereço do tombamento',
+                                   'Endereço como consta no processo de tombamento',
+                                   resp['Endereco']),
+                    build_response('Observação',
+                                   'Observação acrescentada pelos técnicos',
+                                   resp['Observacao'])
+                ]
+
+                tombamentos.append(tomb)
+
+            #unpacking if there's only one
+            if len(tombamentos) == 1:
+                return tombamentos[0]
+            else:
+                return tombamentos
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+
+
 
 
 
