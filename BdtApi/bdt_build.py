@@ -294,16 +294,16 @@ class ApiBdtBuilder:
                                    tomb_resp['NivelPreservacao']),
                     build_response('Data de atualização',
                                    'Data da última atualização das informações sobre o tombamento',
-                                   resp['DataAtualizacao'][:10]),
+                                   tomb_resp['DataAtualizacao'][:10]),
                     build_response('Data de cadastro',
                                    'Data do cadastro do tombamento',
-                                   resp['DataCadastro'][:10]),
+                                   tomb_resp['DataCadastro'][:10]),
                     build_response('Endereço do tombamento',
                                    'Endereço como consta no processo de tombamento',
-                                   resp['Endereco']),
+                                   tomb_resp['Endereco']),
                     build_response('Observação',
                                    'Observação acrescentada pelos técnicos',
-                                   resp['Observacao'])
+                                   tomb_resp['Observacao'])
                 ]
 
                 tombamentos.append(tomb)
