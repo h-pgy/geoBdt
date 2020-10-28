@@ -12,7 +12,7 @@ class ApiBdtBuilder:
         self.setor = setor
         self.quadra = quadra
         self.lote = lote
-        self.digito = digito
+        self.digito = digito or '1'
 
     @property
     def area_manancial(self):
@@ -84,7 +84,7 @@ class ApiBdtBuilder:
             return build_response('Próximo a hidrografia',
                                   'Indica se o projeto está próximo a corpo de água/hidrografia',
                                   True)
-        elif resp == 'Não':
+        elif resp == 'NÃO':
             return build_response('Próximo a hidrografia',
                                   'Indica se o projeto está próximo a corpo de água/hidrografia',
                                   False)
