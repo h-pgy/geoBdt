@@ -5,7 +5,7 @@ from .helpers import build_response
 
 class ApiBdtBuilder:
 
-    def __init__(self, setor, quadra, lote, digito, data_getter = None):
+    def __init__(self, setor, quadra, lote, digito, data_getter=None):
 
         if data_getter is None:
             self.api = ApiDataGetter()
@@ -21,21 +21,25 @@ class ApiBdtBuilder:
 
         if resp['Resultado'] == 'SIM':
 
-            return [
-                build_response('Incide área de manancial',
-                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
-                               True
-                               ),
-                build_response('Nome',
-                               'Identificação do manancial em que a quadra incide',
-                               resp['Nome']
-                               )
-            ]
+            return build_response(
+                'Área Manancial',
+                'Área manancial'
+                [[
+                    build_response('Incide área de manancial',
+                                   'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                                   True
+                                   ),
+                    build_response('Nome',
+                                   'Identificação do manancial em que a quadra incide',
+                                   resp['Nome']
+                                   )
+                ]]
+            )
         elif resp['Resultado'] == 'NÃO':
             return build_response('Incide área de manancial',
-                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
-                               False
-                               )
+                                  'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                                  False
+                                  )
 
         elif resp['Resultado'] is None:
             raise SQLNotFound('A quadra não foi encontrada')
@@ -49,24 +53,27 @@ class ApiBdtBuilder:
         resp = self.api.consult_operacao_urb(self.setor, self.quadra)
 
         if resp['Resultado'] == 'SIM':
-
-            return [
-                build_response('Incide operação urbana',
-                               'Se há incidência de operação urbana no projeto',
-                               True),
-                build_response('Nome da Operação Urbana',
-                               'Nome da operação urbana que incide no projeto',
-                               resp['Nome']),
-                build_response('Setor',
-                               'Identificação do setor da operação urbana que incide no projeto',
-                               resp['Setor'])
-            ]
+            return build_response(
+                'Operação Urbana',
+                'Operação urbana',
+                [[
+                    build_response('Incide operação urbana',
+                                   'Se há incidência de operação urbana no projeto',
+                                   True),
+                    build_response('Nome da Operação Urbana',
+                                   'Nome da operação urbana que incide no projeto',
+                                   resp['Nome']),
+                    build_response('Setor',
+                                   'Identificação do setor da operação urbana que incide no projeto',
+                                   resp['Setor'])
+                ]]
+            )
 
         elif resp['Resultado'] == 'NÃO':
 
             return build_response('Incide operação urbana',
-                               'Se há incidência de operação urbana no projeto',
-                               False)
+                                  'Se há incidência de operação urbana no projeto',
+                                  False)
 
         elif resp['Resultado'] is None:
 
@@ -101,28 +108,32 @@ class ApiBdtBuilder:
         resp = self.api.consult_dup_dis(self.setor, self.quadra)
 
         if resp['Resultado'] == 'SIM':
-            return [
-                build_response('Incidência de DUP ou DIS',
-                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
-                               ' sobre a quadra em que se localiza o projeto',
-                               True),
-                build_response('Tipo da Norma',
-                               'Indica se o decreto é de "interesse público" (DIS) ou "utilidade pública" (DUP)',
-                               resp['Tipo']
-                               ),
-                build_response('Número',
-                               'Numeração identificadora da norma',
-                               resp['Numero']),
-                build_response('Ano',
-                               'Ano de publicação da norma',
-                               int(resp['Data'][:4]))
-            ]
+            return build_response(
+                'Incidência de DUP ou DIS',
+                'Incidência de DUP ou DIS',
+                [[
+                    build_response('Incidência de DUP ou DIS',
+                                   'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                                   ' sobre a quadra em que se localiza o projeto',
+                                   True),
+                    build_response('Tipo da Norma',
+                                   'Indica se o decreto é de "interesse público" (DIS) ou "utilidade pública" (DUP)',
+                                   resp['Tipo']
+                                   ),
+                    build_response('Número',
+                                   'Numeração identificadora da norma',
+                                   resp['Numero']),
+                    build_response('Ano',
+                                   'Ano de publicação da norma',
+                                   int(resp['Data'][:4]))
+                ]]
+            )
 
         elif resp['Resultado'] == 'NÃO':
             return build_response('Incidência de DUP ou DIS',
-                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
-                               ' sobre a quadra em que se localiza o projeto',
-                               False)
+                                  'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                                  ' sobre a quadra em que se localiza o projeto',
+                                  False)
 
         elif resp['Resultado'] is None:
 
@@ -133,7 +144,7 @@ class ApiBdtBuilder:
 
     @property
     def melhoramento_viario(self):
-        #to do: maybe reduce the size of this funcion with a helper
+        # to do: maybe reduce the size of this funcion with a helper
 
         resp = self.api.consult_melhor_viario(self.setor, self.quadra)
 
@@ -143,7 +154,7 @@ class ApiBdtBuilder:
             raise SQLNotFound('A quadra não foi encontrada')
         elif type(lista_melhor) is not list:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
-        #then there's a result that should be parsed
+        # then there's a result that should be parsed
         else:
             full_resp = []
             for obj in lista_melhor:
@@ -178,7 +189,7 @@ class ApiBdtBuilder:
 
                     full_resp.append(obj_resp)
 
-            return full_resp
+            return build_response('Melhoramento Viário', 'Melhoramento viário', full_resp)
 
     @property
     def area_protecao_ambiental(self):
@@ -217,10 +228,14 @@ class ApiBdtBuilder:
                                   'está localizada em área de restrição geotécnica',
                                   False)
         elif resp['Resultado'] == 'SIM':
-            return [build_response('Restrição Geotécnica',
-                                  'Indica se a quadra onde se situa o projeto '
-                                  'está localizada em área de restrição geotécnica',
-                                  True),
+            return build_response(
+                'Restrição Geotécnica',
+                'Restrição geotécnica',
+                [[
+                    build_response('Restrição Geotécnica',
+                                   'Indica se a quadra onde se situa o projeto '
+                                   'está localizada em área de restrição geotécnica',
+                                   True),
                     build_response('Área de restrição geotécnica',
                                    'Identificação da área de restrição geotécnica'
                                    ' em que se encontra o projeto',
@@ -228,7 +243,8 @@ class ApiBdtBuilder:
                     build_response('Regulamentação',
                                    'Normativa que regulamenta a área de restrição geotécnica identificada',
                                    resp['TextoRegulamentacao'])
-            ]
+                ]]
+            )
 
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
@@ -236,9 +252,10 @@ class ApiBdtBuilder:
     @property
     def historico_contaminacao(self):
 
-        resp = self.api.consult_processo_contaminacao(self.setor, self.quadra, self.lote)
+        resp = self.api.consult_processo_contaminacao(
+            self.setor, self.quadra, self.lote)
 
-        #a webservice nao diferencia SQL invalido de SQL que nao possui processos!
+        # a webservice nao diferencia SQL invalido de SQL que nao possui processos!
 
         if resp['Processos'] is None:
             return build_response('Processos de contaminação',
@@ -265,16 +282,17 @@ class ApiBdtBuilder:
 
                 full_resp.append(proc_resp)
 
-            return full_resp
+            return build_response('Histórico Contaminação', 'Histórico contaminação', full_resp)
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
 
     @property
     def tombamentos(self):
 
-        resp = self.api.consult_tombamentos(self.setor, self.quadra, self.lote, self.digito)
+        resp = self.api.consult_tombamentos(
+            self.setor, self.quadra, self.lote, self.digito)
 
-        #a webservice nao diferencia SQL invalido de SQL que nao possui processos!
+        # a webservice nao diferencia SQL invalido de SQL que nao possui processos!
 
         if resp is None:
             return build_response('Tombamentos/Patrimônio Histórico',
@@ -308,20 +326,7 @@ class ApiBdtBuilder:
 
                 tombamentos.append(tomb)
 
-            return tombamentos
+            return build_response('Tobamentos', 'Tombamentos', tombamentos)
 
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
-
-
-
-
-
-
-
-
-
-
-
-
-
