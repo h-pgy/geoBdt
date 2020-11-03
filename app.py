@@ -18,6 +18,29 @@ def gerar_bdt(setor, quadra, lote=None, digito=None):
     return bdt
 
 
+@ns.route('/bdt/<string:sql>')
+class bdt(Resource):
+
+    def get(self, sql):
+        sql, digito = tuple(sql.split('-'))
+        setor, quadra, lote = tuple(sql.split('.'))
+
+        bdt = gerar_bdt(setor, quadra, lote, digito)
+        return {
+           'bdt': [
+                bdt.area_manancial,
+                bdt.operacao_urbana,
+                bdt.hidrografia,
+                bdt.dis_dup,
+                bdt.melhoramento_viario,
+                bdt.area_protecao_ambiental,
+                bdt.restricao_geotecnica,
+                bdt.historico_contaminacao,
+                bdt.tombamentos,
+            ]
+        }
+
+
 @ns.route('/area_manancial/<string:setor>/<string:quadra>')
 class manancial(Resource):
 
