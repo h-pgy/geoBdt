@@ -3,8 +3,8 @@ from flask_restx import Resource, Api
 from BdtApi.bdt_build import ApiBdtBuilder
 
 app = Flask(__name__)
-api = Api(app, version='0.1', title='GeoBDT Mock API',
-    description='Mock API para o GeoBDT',
+api = Api(app, version='1.0', title='GeoBDT Automático',
+    description='GeoBDT - Boletim de Dados Técnicos Automático e Georreferenciado',
 )
 
 ns = api.namespace('BDT', description='Endpoint para gerar o BDT')
@@ -83,4 +83,4 @@ class tombamentos(Resource):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host = '0.0.0.0')
