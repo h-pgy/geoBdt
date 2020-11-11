@@ -81,6 +81,14 @@ class tombamentos(Resource):
         bdt = gerar_bdt(setor, quadra, lote, digito)
         return bdt.tombamentos
 
+
+@ns.route('/zoneamento/<string:setor>/<string:quadra>/<string:lote>')
+class zoneamento(Resource):
+
+    def get(self,setor, quadra, lote):
+        bdt = gerar_bdt(setor, quadra, lote)
+        return bdt.zoneamento
+
 @ns.route('/bdt/<string:sql>')
 class bdt(Resource):
 
@@ -100,6 +108,7 @@ class bdt(Resource):
                 bdt.restricao_geotecnica,
                 bdt.historico_contaminacao,
                 bdt.tombamentos,
+                bdt.zoneamento
             ]
         }
 

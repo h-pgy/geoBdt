@@ -1,6 +1,6 @@
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound
-from .helpers import build_response
+from .helpers import build_response, parsear_zoneamento
 
 
 class ApiBdtBuilder:
@@ -312,6 +312,70 @@ class ApiBdtBuilder:
 
         else:
             raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+    @property
+    def zoneamento(self):
+
+        resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+
+        if resp['Codigo'] == 4:
+            raise SQLNotFound('A quadra não foi encontrada')
+        elif resp['Codigo'] == 0:
+
+            zoneamento_formatado = []
+            zoneamento = parsear_zoneamento(resp)
+            for zona in zoneamento:
+                if zona['TipoZoneamento'] == 'Zona de Uso':
+
+                    formated = [
+                        build_response('Sigla',
+                                       'Sigla da Zona de Uso',
+                                       zona['SiglaZonaUso']),
+                        build_response('Descrição',
+                                       'Descrição da zona de uso',
+                                       zona['DescricaoZonaUso']),
+                        build_response('Legislação',
+                                       'Legislação que cria/regulamenta a zona de uso',
+                                       zona['Legislacao'])
+                    ]
+
+                elif zona['TipoZoneamento'] == 'Setores da Macroárea de Estruturação Metropolitana':
+
+                    formated = [
+                        build_response('Setor',
+                                       'Nome do setor da MEM',
+                                       zona['NomeSetor']),
+                        build_response('Código',
+                                       'Código do setor da MEM',
+                                       zona['CodigoSetor'])
+                    ]
+
+                elif zona['TipoZoneamento'] == 'Quota Ambiental':
+
+                    formated = [
+                        build_response('PA',
+                                       'Perímetro de Qualificação Ambiental',
+                                       zona['Perímetro de Qualificação Ambiental'])
+                    ]
+
+                elif zona['TipoZoneamento'] == 'Perímetro de Incentivo ao Desenvolvimento Econômico':
+                    formated = [
+                        build_response('PI',
+                                       'Perímetro de Incentivo ao Desenvolvimento Econômico',
+                                       zona['CodigoPerimetro'])
+                    ]
+
+
+                zoneamento_formatado.append(formated)
+
+            return zoneamento_formatado
+
+        else:
+            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+
+
+
+
 
 
 
