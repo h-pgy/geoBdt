@@ -9,7 +9,7 @@ def build_response(label, description, value):
 
 # HELPERS PARA O ZONEAMENTO
 
-def pegar_zoneamento(resp):
+def parsear_zoneamento(resp):
     """Parses zoning API resposne data to a more
     semantic response"""
 
@@ -26,7 +26,7 @@ def pegar_zoneamento(resp):
 
         return zoneamento_imovel
     else:
-        return []
+        return None
 
 def _pegar_zona_de_uso(dici_resp):
 
