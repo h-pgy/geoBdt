@@ -3,8 +3,8 @@ from flask_restx import Resource, Api
 from BdtApi.bdt_build import ApiBdtBuilder
 
 app = Flask(__name__)
-api = Api(app, version='0.1', title='GeoBDT Mock API',
-    description='Mock API para o GeoBDT',
+api = Api(app, version='1.0', title='GeoBDT Automático',
+    description='GeoBDT - Boletim de Dados Técnicos Automático e Georreferenciado',
 )
 
 ns = api.namespace('BDT', description='Endpoint para gerar o BDT')
@@ -82,5 +82,35 @@ class tombamentos(Resource):
         return bdt.tombamentos
 
 
+@ns.route('/zoneamento/<string:setor>/<string:quadra>/<string:lote>')
+class zoneamento(Resource):
+
+    def get(self,setor, quadra, lote):
+        bdt = gerar_bdt(setor, quadra, lote)
+        return bdt.zoneamento
+
+@ns.route('/bdt/<string:sql>')
+class bdt(Resource):
+
+    def get(self, sql):
+        sql, digito = tuple(sql.split('-'))
+        setor, quadra, lote = tuple(sql.split('.'))
+
+        bdt = gerar_bdt(setor, quadra, lote, digito)
+        return {
+           'bdt': {
+                'Área de manancial' : bdt.area_manancial,
+                'Operação Urbana' : bdt.operacao_urbana,
+                'Hidrografia' : bdt.hidrografia,
+                'DIS e DUP' : bdt.dis_dup,
+                'Melhoramento Viário' : bdt.melhoramento_viario,
+                'Área de Proteção Ambiental' : bdt.area_protecao_ambiental,
+                'Restrição Geotécnica' : bdt.restricao_geotecnica,
+                'Histórico de Contaminação' : bdt.historico_contaminacao,
+                'Patrimônio Histórico' : bdt.tombamentos,
+                'Zoneamento' : bdt.zoneamento
+           }
+        }
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host = '0.0.0.0')
