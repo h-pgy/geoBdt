@@ -98,18 +98,18 @@ class bdt(Resource):
 
         bdt = gerar_bdt(setor, quadra, lote, digito)
         return {
-           'bdt': [
-                bdt.area_manancial,
-                bdt.operacao_urbana,
-                bdt.hidrografia,
-                bdt.dis_dup,
-                bdt.melhoramento_viario,
-                bdt.area_protecao_ambiental,
-                bdt.restricao_geotecnica,
-                bdt.historico_contaminacao,
-                bdt.tombamentos,
-                bdt.zoneamento
-            ]
+           'bdt': {
+                'Área de manancial' : bdt.area_manancial,
+                'Operação Urbana' : bdt.operacao_urbana,
+                'Hidrografia' : bdt.hidrografia,
+                'DIS e DUP' : bdt.dis_dup,
+                'Melhoramento Viário' : bdt.melhoramento_viario,
+                'Área de Proteção Ambiental' : bdt.area_protecao_ambiental,
+                'Restrição Geotécnica' : bdt.restricao_geotecnica,
+                'Histórico de Contaminação' : bdt.historico_contaminacao,
+                'Patrimônio Histórico' : bdt.tombamentos,
+                'Zoneamento' : bdt.zoneamento
+           }
         }
 
 if __name__ == '__main__':
