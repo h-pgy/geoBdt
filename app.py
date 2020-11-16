@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restx import Resource, Api
 from BdtApi.bdt_build import ApiBdtBuilder
+from BdtApi.proj_errors import SQLNotFound
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='GeoBDT Automático',
@@ -8,6 +9,31 @@ api = Api(app, version='1.0', title='GeoBDT Automático',
 )
 
 ns = api.namespace('BDT', description='Endpoint para gerar o BDT')
+
+@ns.errorhandler(SQLNotFound)
+def handle_sql_not_found(e):
+
+    url = request.url.split('/')
+    index_bdt = url.index('BDT')
+    sql_url = url[index_bdt+2:]
+    sql_string = (f'Setor: {sql_url[0]} '
+                f'Quadra: {sql_url[1] if len(sql_url)>1 else "Não Informada"} '
+                f'Lote: {sql_url[2] if len(sql_url)>2 else "Não Informado"} '
+                f'Digito: {sql_url[3] if len(sql_url)>3 else "Não Informado"} ')
+    return {'sucess' : False,
+            'data' : [],
+            'message' : f'Setor, quadra ou lote não encontrado. {sql_string}'}, 404
+
+def disclaimer(func):
+
+    def wrapped(*args, **kwargs):
+
+        resp = func(*args, **kwargs)
+
+        return resp
+
+    return wrapped
+
 
 def gerar_bdt(setor, quadra, lote=None, digito=None):
 
