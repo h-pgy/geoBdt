@@ -1,11 +1,11 @@
 from requests import Session
 from requests.packages import urllib3
 from zeep import Client
-from zeep.transports import Transport
 from zeep.cache import InMemoryCache
 from zeep import Settings
 import functools
 from config import p_pwd_cac,p_usr_cac, wsdl_path_intra
+from.raw_xml_transport import Transport
 
 
 def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_timeout = 60):
