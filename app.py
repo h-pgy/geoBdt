@@ -149,7 +149,7 @@ class bdt(Resource):
                 'Restrição Geotécnica' : bdt.restricao_geotecnica,
                 'Histórico de Contaminação' : bdt.historico_contaminacao,
                 'Patrimônio Histórico' : bdt.tombamentos,
-                'Zoneamento' : bdt.zoneamento
+                #'Zoneamento' : bdt.zoneamento
            }
         }
 
