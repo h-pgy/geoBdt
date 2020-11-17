@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_restx import Resource, Api
 from BdtApi.bdt_build import ApiBdtBuilder
-from BdtApi.proj_errors import SQLNotFound
+from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='GeoBDT Automático',
@@ -23,6 +23,13 @@ def handle_sql_not_found(e):
     return {'sucess' : False,
             'data' : [],
             'message' : f'Setor, quadra ou lote não encontrado. {sql_string}'}, 404
+
+@ns.errorhandler(UnexpectedWebserviceResponse)
+def handle_unexpected_resp(e):
+
+    return {'sucess' : False,
+            'data' : [],
+            'message' : str(e)}
 
 def disclaimer(func):
 
