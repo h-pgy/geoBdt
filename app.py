@@ -8,19 +8,19 @@ api = Api(app, version='1.0', title='GeoBDT Automático',
     description='GeoBDT - Boletim de Dados Técnicos Automático e Georreferenciado',
 )
 
-ns = api.namespace('BDT', description='Endpoint para gerar o BDT')
+ns = api.namespace('BDT', description='Conjunto de endpoints que permitem consultar os dados do BDT)
 
 @ns.errorhandler(SQLNotFound)
 def handle_sql_not_found(e):
 
-    return {'sucess' : False,
+    return {'success' : False,
             'data' : [],
             'message' : str(e)}, 404
 
 @ns.errorhandler(UnexpectedWebserviceResponse)
 def handle_unexpected_resp(e):
 
-    return {'sucess' : False,
+    return {'success' : False,
             'data' : [],
             'message' : str(e)}, 500
 
