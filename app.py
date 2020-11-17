@@ -24,13 +24,18 @@ def handle_unexpected_resp(e):
             'data' : [],
             'message' : str(e)}, 500
 
-def disclaimer(func):
+def envelope(func):
 
     def wrapped(*args, **kwargs):
 
         resp = func(*args, **kwargs)
 
-        return resp
+        enveloped = {'success' : True,
+                     'message' : 'O resultado desta pesquisa possui apenas caráter indicativo e não exime da consulta '\
+                                'formal aos órgãos competentes.',
+                     'data' : resp}
+
+        return enveloped
 
     return wrapped
 
@@ -47,6 +52,7 @@ def gerar_bdt(setor, quadra, lote=None, digito=None):
 @ns.route('/area_manancial/<string:setor>/<string:quadra>')
 class manancial(Resource):
 
+    @envelope
     def get(self, setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.area_manancial
@@ -54,6 +60,7 @@ class manancial(Resource):
 @ns.route('/operacao_urbana/<string:setor>/<string:quadra>')
 class operacao_urbana(Resource):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.operacao_urbana
@@ -61,6 +68,7 @@ class operacao_urbana(Resource):
 @ns.route('/hidrografia/<string:setor>/<string:quadra>')
 class hidrografia(Resource):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.hidrografia
@@ -68,6 +76,7 @@ class hidrografia(Resource):
 @ns.route('/dis_dup/<string:setor>/<string:quadra>')
 class dis_dup(Resource):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.dis_dup
@@ -75,6 +84,7 @@ class dis_dup(Resource):
 @ns.route('/melhoramento_viario/<string:setor>/<string:quadra>')
 class melhoramento_viario(Resource,):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.melhoramento_viario
@@ -82,6 +92,7 @@ class melhoramento_viario(Resource,):
 @ns.route('/area_protecao_ambiental/<string:setor>/<string:quadra>')
 class area_protecao_ambiental(Resource):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.area_protecao_ambiental
@@ -89,6 +100,7 @@ class area_protecao_ambiental(Resource):
 @ns.route('/restricao_geotecnica/<string:setor>/<string:quadra>')
 class restricao_geotecnica(Resource):
 
+    @envelope
     def get(self,setor, quadra):
         bdt = gerar_bdt(setor, quadra)
         return bdt.restricao_geotecnica
@@ -96,6 +108,7 @@ class restricao_geotecnica(Resource):
 @ns.route('/historico_contaminacao/<string:setor>/<string:quadra>/<string:lote>')
 class historico_contaminacao(Resource):
 
+    @envelope
     def get(self,setor, quadra, lote):
         bdt = gerar_bdt(setor, quadra, lote)
         return bdt.historico_contaminacao
@@ -103,6 +116,7 @@ class historico_contaminacao(Resource):
 @ns.route('/tombamentos/<string:setor>/<string:quadra>/<string:lote>/<string:digito>')
 class tombamentos(Resource):
 
+    @envelope
     def get(self,setor, quadra, lote, digito):
         bdt = gerar_bdt(setor, quadra, lote, digito)
         return bdt.tombamentos
@@ -111,6 +125,7 @@ class tombamentos(Resource):
 @ns.route('/zoneamento/<string:setor>/<string:quadra>/<string:lote>')
 class zoneamento(Resource):
 
+    @envelope
     def get(self,setor, quadra, lote):
         bdt = gerar_bdt(setor, quadra, lote)
         return bdt.zoneamento
