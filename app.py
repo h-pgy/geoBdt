@@ -122,13 +122,13 @@ class tombamentos(Resource):
         return bdt.tombamentos
 
 
-@ns.route('/zoneamento/<string:setor>/<string:quadra>/<string:lote>')
-class zoneamento(Resource):
-
-    @envelope
-    def get(self,setor, quadra, lote):
-        bdt = gerar_bdt(setor, quadra, lote)
-        return bdt.zoneamento
+#@ns.route('/zoneamento/<string:setor>/<string:quadra>/<string:lote>')
+#class zoneamento(Resource):
+#
+#    @envelope
+#    def get(self,setor, quadra, lote):
+#        bdt = gerar_bdt(setor, quadra, lote)
+#        return bdt.zoneamento
 
 @ns.route('/bdt/<string:sql>')
 class bdt(Resource):
