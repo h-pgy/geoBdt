@@ -7,3 +7,9 @@ class SQLNotFound(http_exceptions.NotFound):
 
     code = 404
     description = 'O setor, a quadra ou o lote não foram encontrados'
+
+class UnexpectedWebserviceResponse(http_exceptions.InternalServerError):
+    """Raised when the upstream webservice behaves unexpectedly"""
+
+    code = 500
+    description = 'A webservice original se comportou de forma inesperada'

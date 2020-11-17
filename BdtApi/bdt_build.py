@@ -1,5 +1,5 @@
 from .get_api_data import ApiDataGetter
-from .proj_errors import SQLNotFound
+from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse
 from .helpers import build_response, parsear_zoneamento
 
 
@@ -18,62 +18,66 @@ class ApiBdtBuilder:
     def area_manancial(self):
 
         resp = self.api.consult_mananc_prox(self.setor, self.quadra)
+        try:
+            if resp['Resultado'] == 'SIM':
 
-        if resp['Resultado'] == 'SIM':
+                return [
+                    build_response('Incide área de manancial',
+                                   'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                                   True
+                                   ),
+                    build_response('Nome',
+                                   'Identificação do manancial em que a quadra incide',
+                                   resp['Nome']
+                                   )
+                ]
+            elif resp['Resultado'] == 'NÃO':
+                return build_response('Incide área de manancial',
+                                   'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
+                                   False
+                                   )
 
-            return [
-                build_response('Incide área de manancial',
-                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
-                               True
-                               ),
-                build_response('Nome',
-                               'Identificação do manancial em que a quadra incide',
-                               resp['Nome']
-                               )
-            ]
-        elif resp['Resultado'] == 'NÃO':
-            return build_response('Incide área de manancial',
-                               'Identifica se a quadra em que se situa o projeto está localizada em área de manancial',
-                               False
-                               )
+            elif resp['Resultado'] is None:
+                raise SQLNotFound('A quadra não foi encontrada')
 
-        elif resp['Resultado'] is None:
-            raise SQLNotFound('A quadra não foi encontrada')
-
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def operacao_urbana(self):
 
         resp = self.api.consult_operacao_urb(self.setor, self.quadra)
+        try:
+            if resp['Resultado'] == 'SIM':
 
-        if resp['Resultado'] == 'SIM':
+                return [
+                    build_response('Incide operação urbana',
+                                   'Se há incidência de operação urbana no projeto',
+                                   True),
+                    build_response('Nome da Operação Urbana',
+                                   'Nome da operação urbana que incide no projeto',
+                                   resp['Nome']),
+                    build_response('Setor',
+                                   'Identificação do setor da operação urbana que incide no projeto',
+                                   resp['Setor'])
+                ]
 
-            return [
-                build_response('Incide operação urbana',
-                               'Se há incidência de operação urbana no projeto',
-                               True),
-                build_response('Nome da Operação Urbana',
-                               'Nome da operação urbana que incide no projeto',
-                               resp['Nome']),
-                build_response('Setor',
-                               'Identificação do setor da operação urbana que incide no projeto',
-                               resp['Setor'])
-            ]
+            elif resp['Resultado'] == 'NÃO':
 
-        elif resp['Resultado'] == 'NÃO':
+                return build_response('Incide operação urbana',
+                                   'Se há incidência de operação urbana no projeto',
+                                   False)
 
-            return build_response('Incide operação urbana',
-                               'Se há incidência de operação urbana no projeto',
-                               False)
+            elif resp['Resultado'] is None:
 
-        elif resp['Resultado'] is None:
+                raise SQLNotFound('A quadra não foi encontrada')
 
-            raise SQLNotFound('A quadra não foi encontrada')
-
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def hidrografia(self):
@@ -93,56 +97,60 @@ class ApiBdtBuilder:
             raise SQLNotFound('A quadra não foi encontrada')
 
         else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def dis_dup(self):
 
         resp = self.api.consult_dup_dis(self.setor, self.quadra)
+        try:
+            if resp['Resultado'] == 'SIM':
+                return [
+                    build_response('Incidência de DUP ou DIS',
+                                   'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                                   ' sobre a quadra em que se localiza o projeto',
+                                   True),
+                    build_response('Tipo da Norma',
+                                   'Indica se o decreto é de "interesse público" (DIS) ou "utilidade pública" (DUP)',
+                                   resp['Tipo']
+                                   ),
+                    build_response('Número',
+                                   'Numeração identificadora da norma',
+                                   resp['Numero']),
+                    build_response('Ano',
+                                   'Ano de publicação da norma',
+                                   int(resp['Data'][:4]))
+                ]
 
-        if resp['Resultado'] == 'SIM':
-            return [
-                build_response('Incidência de DUP ou DIS',
-                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
-                               ' sobre a quadra em que se localiza o projeto',
-                               True),
-                build_response('Tipo da Norma',
-                               'Indica se o decreto é de "interesse público" (DIS) ou "utilidade pública" (DUP)',
-                               resp['Tipo']
-                               ),
-                build_response('Número',
-                               'Numeração identificadora da norma',
-                               resp['Numero']),
-                build_response('Ano',
-                               'Ano de publicação da norma',
-                               int(resp['Data'][:4]))
-            ]
+            elif resp['Resultado'] == 'NÃO':
+                return build_response('Incidência de DUP ou DIS',
+                                   'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
+                                   ' sobre a quadra em que se localiza o projeto',
+                                   False)
 
-        elif resp['Resultado'] == 'NÃO':
-            return build_response('Incidência de DUP ou DIS',
-                               'Indica se há incidência de Decreto de Interesse Social ou Decreto de Utilidade Pública'
-                               ' sobre a quadra em que se localiza o projeto',
-                               False)
+            elif resp['Resultado'] is None:
 
-        elif resp['Resultado'] is None:
+                raise SQLNotFound('A quadra não foi encontrada')
 
-            raise SQLNotFound('A quadra não foi encontrada')
-
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def melhoramento_viario(self):
         #to do: maybe reduce the size of this funcion with a helper
 
         resp = self.api.consult_melhor_viario(self.setor, self.quadra)
-
-        lista_melhor = resp['ArrayOfMelhoramentoViarioMelhoramentoViario']
+        try:
+            lista_melhor = resp['ArrayOfMelhoramentoViarioMelhoramentoViario']
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
         if not lista_melhor:
             raise SQLNotFound('A quadra não foi encontrada')
         elif type(lista_melhor) is not list:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
         #then there's a result that should be parsed
         else:
             full_resp = []
@@ -201,37 +209,39 @@ class ApiBdtBuilder:
                                   ' em área de proteção ambiental',
                                   True)
         else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def restricao_geotecnica(self):
 
         resp = self.api.consult_restr_geotec(self.setor, self.quadra)
+        try:
+            if resp['Resultado'] is None:
+                raise SQLNotFound('A quadra não foi encontrada')
 
-        if resp['Resultado'] is None:
-            raise SQLNotFound('A quadra não foi encontrada')
+            elif resp['Resultado'] == 'NÃO':
+                return build_response('Restrição Geotécnica',
+                                      'Indica se a quadra onde se situa o projeto '
+                                      'está localizada em área de restrição geotécnica',
+                                      False)
+            elif resp['Resultado'] == 'SIM':
+                return [build_response('Restrição Geotécnica',
+                                      'Indica se a quadra onde se situa o projeto '
+                                      'está localizada em área de restrição geotécnica',
+                                      True),
+                        build_response('Área de restrição geotécnica',
+                                       'Identificação da área de restrição geotécnica'
+                                       ' em que se encontra o projeto',
+                                       resp['NomeLocal']),
+                        build_response('Regulamentação',
+                                       'Normativa que regulamenta a área de restrição geotécnica identificada',
+                                       resp['TextoRegulamentacao'])
+                ]
 
-        elif resp['Resultado'] == 'NÃO':
-            return build_response('Restrição Geotécnica',
-                                  'Indica se a quadra onde se situa o projeto '
-                                  'está localizada em área de restrição geotécnica',
-                                  False)
-        elif resp['Resultado'] == 'SIM':
-            return [build_response('Restrição Geotécnica',
-                                  'Indica se a quadra onde se situa o projeto '
-                                  'está localizada em área de restrição geotécnica',
-                                  True),
-                    build_response('Área de restrição geotécnica',
-                                   'Identificação da área de restrição geotécnica'
-                                   ' em que se encontra o projeto',
-                                   resp['NomeLocal']),
-                    build_response('Regulamentação',
-                                   'Normativa que regulamenta a área de restrição geotécnica identificada',
-                                   resp['TextoRegulamentacao'])
-            ]
-
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def historico_contaminacao(self):
@@ -239,35 +249,37 @@ class ApiBdtBuilder:
         resp = self.api.consult_processo_contaminacao(self.setor, self.quadra, self.lote)
 
         #a webservice nao diferencia SQL invalido de SQL que nao possui processos!
+        try:
+            if resp['Processos'] is None:
+                return build_response('Processos de contaminação',
+                                      'Identifica se há processos de contaminação para o SQL solicitado. '
+                                      'ATENÇÃO: a webservice não valida se o SQL solicitado é válido',
+                                      False)
+            elif resp['Processos']:
+                full_resp = []
+                for proc in resp['Processos']['ProcessoContaminacao_Retorno']:
+                    proc_resp = [build_response('Contaminante',
+                                                'Identifica o contaminante avaliado no processo',
+                                                proc['Contaminante']),
+                                 build_response('Etapa do processo',
+                                                'Identifica a etapa em que o processo de contaminação se encontra',
+                                                proc['Etapa']),
+                                 build_response('Restrição de uso',
+                                                'Descreve se há alguma restrição de uso no imóvel devido à contaminação',
+                                                proc['RestricaoUso']),
+                                 build_response('Situação da área',
+                                                'Identifica qual a situação atual da área. '
+                                                'Por exemplo: se ainda está contaminada, se já foi recuperada etc..',
+                                                proc['Situacao'])
+                                 ]
 
-        if resp['Processos'] is None:
-            return build_response('Processos de contaminação',
-                                  'Identifica se há processos de contaminação para o SQL solicitado. '
-                                  'ATENÇÃO: a webservice não valida se o SQL solicitado é válido',
-                                  False)
-        elif resp['Processos']:
-            full_resp = []
-            for proc in resp['Processos']['ProcessoContaminacao_Retorno']:
-                proc_resp = [build_response('Contaminante',
-                                            'Identifica o contaminante avaliado no processo',
-                                            proc['Contaminante']),
-                             build_response('Etapa do processo',
-                                            'Identifica a etapa em que o processo de contaminação se encontra',
-                                            proc['Etapa']),
-                             build_response('Restrição de uso',
-                                            'Descreve se há alguma restrição de uso no imóvel devido à contaminação',
-                                            proc['RestricaoUso']),
-                             build_response('Situação da área',
-                                            'Identifica qual a situação atual da área. '
-                                            'Por exemplo: se ainda está contaminada, se já foi recuperada etc..',
-                                            proc['Situacao'])
-                             ]
+                    full_resp.append(proc_resp)
 
-                full_resp.append(proc_resp)
-
-            return full_resp
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+                return full_resp
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def tombamentos(self):
@@ -311,67 +323,69 @@ class ApiBdtBuilder:
             return tombamentos
 
         else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
     @property
     def zoneamento(self):
 
         resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+        try:
+            if resp['Codigo'] == 4:
+                raise SQLNotFound('A quadra não foi encontrada')
+            elif resp['Codigo'] == 0:
 
-        if resp['Codigo'] == 4:
-            raise SQLNotFound('A quadra não foi encontrada')
-        elif resp['Codigo'] == 0:
+                zoneamento_formatado = []
+                zoneamento = parsear_zoneamento(resp)
+                for zona in zoneamento:
+                    if zona['TipoZoneamento'] == 'Zona de Uso':
 
-            zoneamento_formatado = []
-            zoneamento = parsear_zoneamento(resp)
-            for zona in zoneamento:
-                if zona['TipoZoneamento'] == 'Zona de Uso':
+                        formated = [
+                            build_response('Sigla',
+                                           'Sigla da Zona de Uso',
+                                           zona['SiglaZonaUso']),
+                            build_response('Descrição',
+                                           'Descrição da zona de uso',
+                                           zona['DescricaoZonaUso']),
+                            build_response('Legislação',
+                                           'Legislação que cria/regulamenta a zona de uso',
+                                           zona['Legislacao'])
+                        ]
 
-                    formated = [
-                        build_response('Sigla',
-                                       'Sigla da Zona de Uso',
-                                       zona['SiglaZonaUso']),
-                        build_response('Descrição',
-                                       'Descrição da zona de uso',
-                                       zona['DescricaoZonaUso']),
-                        build_response('Legislação',
-                                       'Legislação que cria/regulamenta a zona de uso',
-                                       zona['Legislacao'])
-                    ]
+                    elif zona['TipoZoneamento'] == 'Setores da Macroárea de Estruturação Metropolitana':
 
-                elif zona['TipoZoneamento'] == 'Setores da Macroárea de Estruturação Metropolitana':
+                        formated = [
+                            build_response('Setor',
+                                           'Nome do setor da MEM',
+                                           zona['NomeSetor']),
+                            build_response('Código',
+                                           'Código do setor da MEM',
+                                           zona['CodigoSetor'])
+                        ]
 
-                    formated = [
-                        build_response('Setor',
-                                       'Nome do setor da MEM',
-                                       zona['NomeSetor']),
-                        build_response('Código',
-                                       'Código do setor da MEM',
-                                       zona['CodigoSetor'])
-                    ]
+                    elif zona['TipoZoneamento'] == 'Quota Ambiental':
 
-                elif zona['TipoZoneamento'] == 'Quota Ambiental':
+                        formated = [
+                            build_response('PA',
+                                           'Perímetro de Qualificação Ambiental',
+                                           zona['Perímetro de Qualificação Ambiental'])
+                        ]
 
-                    formated = [
-                        build_response('PA',
-                                       'Perímetro de Qualificação Ambiental',
-                                       zona['Perímetro de Qualificação Ambiental'])
-                    ]
-
-                elif zona['TipoZoneamento'] == 'Perímetro de Incentivo ao Desenvolvimento Econômico':
-                    formated = [
-                        build_response('PI',
-                                       'Perímetro de Incentivo ao Desenvolvimento Econômico',
-                                       zona['CodigoPerimetro'])
-                    ]
+                    elif zona['TipoZoneamento'] == 'Perímetro de Incentivo ao Desenvolvimento Econômico':
+                        formated = [
+                            build_response('PI',
+                                           'Perímetro de Incentivo ao Desenvolvimento Econômico',
+                                           zona['CodigoPerimetro'])
+                        ]
 
 
-                zoneamento_formatado.append(formated)
+                    zoneamento_formatado.append(formated)
 
-            return zoneamento_formatado
+                return zoneamento_formatado
 
-        else:
-            raise RuntimeError(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
 
 
