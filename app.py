@@ -8,7 +8,7 @@ api = Api(app, version='1.0', title='GeoBDT Automático',
     description='GeoBDT - Boletim de Dados Técnicos Automático e Georreferenciado',
 )
 
-ns = api.namespace('BDT', description='Conjunto de endpoints que permitem consultar os dados do BDT)
+ns = api.namespace('BDT', description='Conjunto de endpoints que permitem consultar os dados do BDT')
 
 @ns.errorhandler(SQLNotFound)
 def handle_sql_not_found(e):
