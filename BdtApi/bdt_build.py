@@ -38,7 +38,7 @@ class ApiBdtBuilder:
                                    )
 
             elif resp['Resultado'] is None:
-                raise SQLNotFound('A quadra não foi encontrada')
+                raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
 
             else:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
@@ -72,7 +72,7 @@ class ApiBdtBuilder:
 
             elif resp['Resultado'] is None:
 
-                raise SQLNotFound('A quadra não foi encontrada')
+                raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
 
             else:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
@@ -94,7 +94,7 @@ class ApiBdtBuilder:
                                   False)
         elif resp is None:
 
-            raise SQLNotFound('A quadra não foi encontrada')
+            raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
 
         else:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
@@ -130,7 +130,7 @@ class ApiBdtBuilder:
 
             elif resp['Resultado'] is None:
 
-                raise SQLNotFound('A quadra não foi encontrada')
+                raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
 
             else:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
@@ -148,7 +148,7 @@ class ApiBdtBuilder:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
         if not lista_melhor:
-            raise SQLNotFound('A quadra não foi encontrada')
+            raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
         elif type(lista_melhor) is not list:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
         #then there's a result that should be parsed
@@ -195,7 +195,7 @@ class ApiBdtBuilder:
 
         if resp is None:
 
-            raise SQLNotFound('A quadra não foi encontrada')
+            raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
         elif resp == 'NÃO':
 
             return build_response('Área de proteção ambiental',
@@ -217,7 +217,7 @@ class ApiBdtBuilder:
         resp = self.api.consult_restr_geotec(self.setor, self.quadra)
         try:
             if resp['Resultado'] is None:
-                raise SQLNotFound('A quadra não foi encontrada')
+                raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
 
             elif resp['Resultado'] == 'NÃO':
                 return build_response('Restrição Geotécnica',
@@ -331,7 +331,7 @@ class ApiBdtBuilder:
         resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
         try:
             if resp['Codigo'] == 4:
-                raise SQLNotFound('A quadra não foi encontrada')
+                raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
             elif resp['Codigo'] == 0:
 
                 zoneamento_formatado = []
