@@ -5,7 +5,7 @@ from zeep.cache import InMemoryCache
 from zeep import Settings
 import functools
 from config import p_pwd_cac,p_usr_cac, wsdl_path_intra
-from.raw_xml_transport import Transport
+from.custom_transports import LoggerTransport
 
 
 def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_timeout = 60):
@@ -25,11 +25,11 @@ def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_ti
     if cache:
         cache = InMemoryCache(cache_timeout)
         client = Client(wsdl_path_intra,
-                        transport=Transport(session=session, cache = cache),
+                        transport=LoggerTransport(session=session, cache = cache),
                         settings=settings)
     else:
         client = Client(wsdl_path_intra,
-                        transport=Transport(session=session),
+                        transport=LoggerTransport(session=session),
                         settings=settings)
     return client
 
