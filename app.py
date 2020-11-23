@@ -1,9 +1,14 @@
-from flask import Flask, request
+from flask import Flask
 from flask_restx import Resource, Api
+from config import db_path
+from models import db
 from BdtApi.bdt_build import ApiBdtBuilder
 from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_path
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 api = Api(app, version='1.0', title='GeoBDT Automático',
     description='GeoBDT - Boletim de Dados Técnicos Automático e Georreferenciado',
 )
