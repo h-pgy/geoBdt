@@ -1,5 +1,6 @@
+from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
-from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse
+from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound
 from .helpers import build_response, parsear_zoneamento
 
 
@@ -13,7 +14,7 @@ class ApiBdtBuilder:
         self.setor = setor
         self.quadra = quadra
         self.lote = lote
-        self.digito = digito or '1'
+        self.digito = digito
 
     @property
     def area_manancial(self):
@@ -326,6 +327,49 @@ class ApiBdtBuilder:
         else:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
+    def logradouro_por_cep(self, cep):
+
+        try:
+            resp = self.api.consult_logradouro_por_cep(cep)
+            if not resp:
+                raise CEPNotFound(f'O Cep {cep} não foi encontrado')
+            if resp['codRetorno'] == 0:
+                #checa para ver se a lista de logradouros veio vazia
+                if not resp['listaLogradouros']['Logradouro']:
+                    raise CEPNotFound(f'O Cep {cep} não foi encontrado')
+
+                dados = resp['listaLogradouros']['Logradouro'][0]
+
+                tipo_logradouro = dados['nomTipoLogradouro'] or ''
+                titulo_logradouro = dados['nomTituloLogradouro'] or ''
+                preposicao_logradouro = dados['nomPreposicaoLogradouro'] or ''
+                nom_logradouro = dados['nomLogradouro'] or ''
+
+                logradouro_completo = ' '.join([tipo_logradouro,
+                                                titulo_logradouro,
+                                                preposicao_logradouro,
+                                                nom_logradouro])
+
+                return [
+                    build_response(
+                        'Nome do Logradouro',
+                        'Identificação do logradouro',
+                        logradouro_completo
+                    ),
+                    build_response('Bairro',
+                                   'Identificação do bairro onde se situa o logradouro',
+                                   dados['nomBairro']),
+                    build_response('Código do logradouro',
+                                   'Código identificador do logradoro na base de dados dos Correios',
+                                   dados['codIdentificadorLogradouro'])
+                ]
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except Fault as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {repr(e)}')
+
+
+
     @property
     def zoneamento(self):
 
@@ -385,8 +429,8 @@ class ApiBdtBuilder:
 
             else:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
-        except KeyError:
-            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
 
 
 

@@ -5,7 +5,7 @@ from flask_restx import Resource, Api, fields
 from config import db_path
 from models import db, BdtLog, BdtRequestLog
 from BdtApi.bdt_build import ApiBdtBuilder
-from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse
+from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_path
@@ -25,6 +25,13 @@ bdt = api.model('BDT', {
 })
 
 @ns.errorhandler(SQLNotFound)
+def handle_sql_not_found(e):
+
+    return {'success' : False,
+            'data' : [],
+            'message' : str(e)}, 404
+
+@ns.errorhandler(CEPNotFound)
 def handle_sql_not_found(e):
 
     return {'success' : False,
@@ -143,6 +150,14 @@ class zoneamento(Resource):
     def get(self,setor, quadra, lote):
         bdt = gerar_bdt(setor, quadra, lote)
         return bdt.zoneamento
+
+@ns.route('/busca_logradouro_por_cep/<string:cep>')
+class busca_cep(Resource):
+
+    @envelope
+    def get(self,cep):
+        bdt = gerar_bdt(None, None) #não precisa desses dados aqui
+        return bdt.logradouro_por_cep(cep)
 
 @ns.route('/bdt/<string:id>')
 class bdt(Resource):

@@ -8,6 +8,12 @@ class SQLNotFound(http_exceptions.NotFound):
     code = 404
     description = 'O setor, a quadra ou o lote não foram encontrados'
 
+class CEPNotFound(http_exceptions.NotFound):
+    """Raised when can't find Setor, Quadra or Lote of project"""
+
+    code = 404
+    description = 'O cep não foi encontrado'
+
 class UnexpectedWebserviceResponse(http_exceptions.InternalServerError):
     """Raised when the upstream webservice behaves unexpectedly"""
 

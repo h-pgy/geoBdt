@@ -21,6 +21,19 @@ def pegar_rua_iptu(imovel):
 
     return rua_completo
 
+
+def dados_endereco_iptu(imovel):
+
+    return {
+        'logradouro' : pegar_rua_iptu(imovel),
+        'numeracao' : imovel['numImovelField'],
+        'cep' : imovel['numCEPField'],
+        'codlog' : imovel['numCodLogField']['valueField'],
+        'bairro' : imovel['nomBairroImovelField']['valueField']
+    }
+
+
+
 # HELPERS PARA O ZONEAMENTO
 
 def parsear_zoneamento(resp):

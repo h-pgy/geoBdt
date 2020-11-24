@@ -113,3 +113,20 @@ class ApiDataGetter:
         resp = client.service['ConsultarTombamentos.v1'](setor, quadra, lote, digito)
 
         return resp
+
+    @create_client()
+    @log_request
+    def consult_imovel_por_sql(self, setor, quadra, lote, digito, client):
+
+        str_sql = ''.join([setor, quadra, lote, digito])
+        resp = client.service['ObterLocalPorSQL.v1'](str_sql, 'S')
+
+        return resp
+
+    @create_client()
+    @log_request
+    def consult_logradouro_por_cep(self, cep, client):
+
+        resp = client.service['ConsultarLogradouroPorCEP.v1'](cep, 0)
+
+        return resp
