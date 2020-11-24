@@ -5,10 +5,11 @@ from .helpers import build_response, parsear_zoneamento
 
 class ApiBdtBuilder:
 
-    def __init__(self, setor, quadra, lote, digito, data_getter = None):
+    def __init__(self, setor, quadra, lote, digito, bdt_id = None, log_requests = True, data_getter = None):
 
         if data_getter is None:
-            self.api = ApiDataGetter()
+            self.api = ApiDataGetter(log_requests = log_requests, bdt_id = bdt_id)
+        self.id = bdt_id or 'NaoRegistrado'
         self.setor = setor
         self.quadra = quadra
         self.lote = lote

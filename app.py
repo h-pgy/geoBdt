@@ -1,7 +1,9 @@
-from flask import Flask
-from flask_restx import Resource, Api
+import datetime
+import json
+from flask import Flask, request
+from flask_restx import Resource, Api, fields
 from config import db_path
-from models import db
+from models import db, BdtLog, BdtRequestLog
 from BdtApi.bdt_build import ApiBdtBuilder
 from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse
 
@@ -14,6 +16,13 @@ api = Api(app, version='1.0', title='GeoBDT Automático',
 )
 
 ns = api.namespace('BDT', description='Conjunto de endpoints que permitem consultar os dados do BDT')
+
+bdt = api.model('BDT', {
+    'setor' : fields.String,
+    'quadra'  : fields.String,
+    'lote' : fields.String,
+    'digito' : fields.String,
+})
 
 @ns.errorhandler(SQLNotFound)
 def handle_sql_not_found(e):
@@ -45,11 +54,11 @@ def envelope(func):
     return wrapped
 
 
-def gerar_bdt(setor, quadra, lote=None, digito=None):
+def gerar_bdt(setor, quadra, lote=None, digito=None, bdt_id = None):
 
     lote=lote or '0001'
     digito = digito or '1'
-    bdt = ApiBdtBuilder(setor, quadra, lote, digito)
+    bdt = ApiBdtBuilder(setor, quadra, lote, digito, bdt_id)
 
     return bdt
 
@@ -135,28 +144,58 @@ class zoneamento(Resource):
         bdt = gerar_bdt(setor, quadra, lote)
         return bdt.zoneamento
 
-@ns.route('/bdt/<string:sql>')
+@ns.route('/bdt/<string:id>')
 class bdt(Resource):
 
-    def get(self, sql):
-        sql, digito = tuple(sql.split('-'))
-        setor, quadra, lote = tuple(sql.split('.'))
+    @ns.expect(bdt)
+    def post(self, id):
 
-        bdt = gerar_bdt(setor, quadra, lote, digito)
-        return {
-           'bdt': {
-                'Área de manancial' : bdt.area_manancial,
-                'Operação Urbana' : bdt.operacao_urbana,
-                'Hidrografia' : bdt.hidrografia,
-                'DIS e DUP' : bdt.dis_dup,
-                'Melhoramento Viário' : bdt.melhoramento_viario,
-                'Área de Proteção Ambiental' : bdt.area_protecao_ambiental,
-                'Restrição Geotécnica' : bdt.restricao_geotecnica,
-                'Histórico de Contaminação' : bdt.historico_contaminacao,
-                'Patrimônio Histórico' : bdt.tombamentos,
-                'Zoneamento' : bdt.zoneamento
-           }
+        dados = request.get_json()
+
+        bdt = gerar_bdt(**dados, bdt_id = id)
+        data = {
+            'bdt': {
+                'Área de manancial': bdt.area_manancial,
+                'Operação Urbana': bdt.operacao_urbana,
+                'Hidrografia': bdt.hidrografia,
+                'DIS e DUP': bdt.dis_dup,
+                'Melhoramento Viário': bdt.melhoramento_viario,
+                'Área de Proteção Ambiental': bdt.area_protecao_ambiental,
+                'Restrição Geotécnica': bdt.restricao_geotecnica,
+                'Histórico de Contaminação': bdt.historico_contaminacao,
+                'Patrimônio Histórico': bdt.tombamentos,
+                'Zoneamento': bdt.zoneamento
+            }
         }
+
+        agora = datetime.datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
+        bdt = BdtLog(created_at = agora,
+                     data = json.dumps(data),
+                     bdt_id = id)
+        db.session.add(bdt)
+        db.session.commit()
+
+        return data
+
+    def get(self, id):
+
+        requests = BdtRequestLog.query.filter_by(bdt_id = id).all()
+        parsed_reqs = []
+        for req in requests:
+            req_data = {'request_headers' : req.request_headers,
+                    'request_xml' : req.request_xml,
+                    'response_xml' : req.response_xml,
+                    'request_datetime' : req.request_datetime}
+            parsed_reqs.append(req_data)
+        bdt = BdtLog.query.filter_by(bdt_id = id).first()
+
+        return {
+            'id' : bdt.bdt_id,
+            'created_at' : bdt.created_at,
+            'parsed_data' : json.loads(bdt.data),
+            'requests' : parsed_reqs
+        }
+
 
 if __name__ == '__main__':
     app.run(debug=True, host = '0.0.0.0')
