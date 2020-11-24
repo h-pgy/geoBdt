@@ -7,6 +7,20 @@ def build_response(label, description, value):
             'description' : description,
             'value' : value}
 
+#HELPERS PARA DADOS IPTU/TPCL
+
+def pegar_rua_iptu(imovel):
+    tipo_logradouro = imovel['codTipoLogradouroField']['valueField'].strip()
+    titulo_logradouro = imovel['txtTituloLogradouroField']['valueField'].strip()
+    preposicao_log = imovel['txtPreposicaoLogradouroField']['valueField'] or ''
+    nom_logradouro = imovel['nomLogradouroField']['valueField'].strip()
+    rua_completo = ' '.join([tipo_logradouro,
+                             titulo_logradouro,
+                             preposicao_log,
+                             nom_logradouro])
+
+    return rua_completo
+
 # HELPERS PARA O ZONEAMENTO
 
 def parsear_zoneamento(resp):
