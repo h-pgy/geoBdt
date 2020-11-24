@@ -104,7 +104,10 @@ def _pegar_setor_mem(dici_resp):
     if dici_resp['DescricaoZonaUso'].strip() == 'MACROAREA E SETORES DA MEM':
 
         cod_setor = dici_resp['CodigoZoneamento'][-4:-2]
-        nome_do_setor = de_para_setores_da_mem[int(cod_setor)]
+        try:
+            nome_do_setor = de_para_setores_da_mem[int(cod_setor)]
+        except KeyError:
+            nome_do_setor = None
 
         return {'CodigoSetor': cod_setor,
                 'NomeSetor': nome_do_setor,
