@@ -5,7 +5,8 @@ from flask_restx import Resource, Api, fields
 from config import db_path
 from models import db, BdtLog, BdtRequestLog
 from BdtApi.bdt_build import ApiBdtBuilder
-from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound
+from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, BDTNotFound
+from BdtApi.helpers import build_response
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_path
@@ -32,6 +33,13 @@ def handle_sql_not_found(e):
             'message' : str(e)}, 404
 
 @ns.errorhandler(CEPNotFound)
+def handle_sql_not_found(e):
+
+    return {'success' : False,
+            'data' : [],
+            'message' : str(e)}, 404
+
+@ns.errorhandler(BDTNotFound)
 def handle_sql_not_found(e):
 
     return {'success' : False,
@@ -197,18 +205,43 @@ class bdt(Resource):
 
         bdt = gerar_bdt(**dados, bdt_id = id)
         data = {
-            'bdt': {
-                'Área de manancial': bdt.area_manancial,
-                'Operação Urbana': bdt.operacao_urbana,
-                'Hidrografia': bdt.hidrografia,
-                'DIS e DUP': bdt.dis_dup,
-                'Melhoramento Viário': bdt.melhoramento_viario,
-                'Área de Proteção Ambiental': bdt.area_protecao_ambiental,
-                'Restrição Geotécnica': bdt.restricao_geotecnica,
-                'Histórico de Contaminação': bdt.historico_contaminacao,
-                'Patrimônio Histórico': bdt.tombamentos,
-                'Zoneamento': bdt.zoneamento
-            }
+            'bdt': [
+                build_response('Área de manancial',
+                               'Área de manancial',
+                               bdt.area_manancial),
+                build_response('Operação Urbana',
+                               'Operação Urbana',
+                               bdt.operacao_urbana),
+                build_response('Hidrografia',
+                               'Hidrografia',
+                               bdt.hidrografia,
+                               ),
+                build_response('DIS e DUP',
+                               'DIS e DUP',
+                               bdt.dis_dup
+                               ),
+                build_response('Melhoramento Viário',
+                               'Melhoramento Viário',
+                               bdt.melhoramento_viario
+                               ),
+                build_response('Área de Proteção Ambiental',
+                               'Área de Proteção Ambiental',
+                               bdt.area_protecao_ambiental
+                               ),
+                build_response('Restrição Geotécnica',
+                               'Restrição Geotécnica',
+                               bdt.restricao_geotecnica
+                               ),
+                build_response('Histórico de Contaminação',
+                               'Histórico de Contaminação',
+                               bdt.historico_contaminacao
+                               ),
+                build_response('Patrimônio Histórico',
+                               'Patrimônio Histórico',
+                               bdt.tombamentos
+                               )
+                # 'Zoneamento' : bdt.zoneamento
+            ]
         }
 
         agora = datetime.datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
@@ -220,9 +253,12 @@ class bdt(Resource):
 
         return data
 
+    @envelope
     def get(self, id):
 
         requests = BdtRequestLog.query.filter_by(bdt_id = id).all()
+        if requests is None:
+            raise BDTNotFound(f'BDT não encontrado {id}')
         parsed_reqs = []
         for req in requests:
             req_data = {'request_headers' : req.request_headers,
@@ -231,7 +267,8 @@ class bdt(Resource):
                     'request_datetime' : req.request_datetime}
             parsed_reqs.append(req_data)
         bdt = BdtLog.query.filter_by(bdt_id = id).first()
-
+        if bdt is None:
+            raise BDTNotFound(f'BDT não encontrado {id}')
         return {
             'id' : bdt.bdt_id,
             'created_at' : bdt.created_at,

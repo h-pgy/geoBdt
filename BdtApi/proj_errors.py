@@ -26,3 +26,9 @@ class UnexpectedWebserviceResponse(http_exceptions.InternalServerError):
 
     code = 500
     description = 'A webservice original se comportou de forma inesperada'
+
+class BDTNotFound(http_exceptions.InternalServerError):
+    """Raised when there is no BDT with that ID in the database"""
+
+    code = 404
+    description = 'O BDT nao foi encontrado'
