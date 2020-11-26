@@ -1,6 +1,6 @@
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse
-from .helpers import build_response, parsear_zoneamento
+from .helpers import build_response, parsear_zoneamento, detalhes_tombamento
 
 
 class ApiBdtBuilder:
@@ -340,6 +340,7 @@ class ApiBdtBuilder:
 
             tombamentos = []
             for tomb_resp in resp:
+                niveis = detalhes_tombamento(tomb_resp['CodigoNivelPreservacao'])
                 tomb = [
                     build_response('Código do nível de preservação',
                                    'Código que identifica o nível de preservação do imóvel pelo patrimônio histórico.',
@@ -360,6 +361,8 @@ class ApiBdtBuilder:
                                    'Observação acrescentada pelos técnicos',
                                    tomb_resp['Observacao'])
                 ]
+
+                tomb.extend(niveis)
 
                 tombamentos.append(tomb)
 
