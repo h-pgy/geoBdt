@@ -159,6 +159,16 @@ class busca_cep(Resource):
         bdt = gerar_bdt(None, None) #não precisa desses dados aqui
         return bdt.logradouro_por_cep(cep)
 
+@ns.route('/parametros_construtivos_HIS/<string:setor>/<string:quadra>/<string:lote>')
+class param_constru_his(Resource):
+
+    @envelope
+    def get(self,setor, quadra, lote):
+
+        bdt = gerar_bdt(setor, quadra, lote)
+
+        return bdt.param_constru_his
+
 @ns.route('/bdt/<string:id>')
 class bdt(Resource):
 

@@ -14,6 +14,13 @@ class CEPNotFound(http_exceptions.NotFound):
     code = 404
     description = 'O cep não foi encontrado'
 
+class ZonaUsoNotFound(http_exceptions.NotFound):
+    """Raised when there are no parameters or can't found that
+    specif zoning id"""
+
+    code = 404
+    description = 'A Zona de Uso não foi encontrada'
+
 class UnexpectedWebserviceResponse(http_exceptions.InternalServerError):
     """Raised when the upstream webservice behaves unexpectedly"""
 
