@@ -167,6 +167,10 @@ class bdt(Resource):
                               'Melhoramento Viário',
                                 bdt.melhoramento_viario
                ),
+               build_response('Faixa Não Edificável',
+                              'Faixa Não Edificável',
+                              bdt.faixa_nao_edificavel
+                              ),
                build_response('Área de Proteção Ambiental',
                               'Área de Proteção Ambiental',
                               bdt.area_protecao_ambiental
