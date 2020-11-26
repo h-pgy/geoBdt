@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restx import Resource, Api
 from BdtApi.bdt_build import ApiBdtBuilder
 from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse
+from BdtApi.helpers import build_response
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='GeoBDT Automático',
@@ -139,18 +140,43 @@ class bdt(Resource):
 
         bdt = gerar_bdt(setor, quadra, lote, digito)
         return {
-           'bdt': {
-                'Área de manancial' : bdt.area_manancial,
-                'Operação Urbana' : bdt.operacao_urbana,
-                'Hidrografia' : bdt.hidrografia,
-                'DIS e DUP' : bdt.dis_dup,
-                'Melhoramento Viário' : bdt.melhoramento_viario,
-                'Área de Proteção Ambiental' : bdt.area_protecao_ambiental,
-                'Restrição Geotécnica' : bdt.restricao_geotecnica,
-                'Histórico de Contaminação' : bdt.historico_contaminacao,
-                'Patrimônio Histórico' : bdt.tombamentos,
+           'bdt': [
+                build_response('Área de manancial',
+                               'Área de manancial',
+                                bdt.area_manancial),
+                build_response('Operação Urbana',
+                               'Operação Urbana',
+                               bdt.operacao_urbana),
+                build_response('Hidrografia',
+                               'Hidrografia',
+                                bdt.hidrografia,
+                               ),
+               build_response('DIS e DUP',
+                              'DIS e DUP',
+                                bdt.dis_dup
+                                ),
+               build_response('Melhoramento Viário',
+                              'Melhoramento Viário',
+                                bdt.melhoramento_viario
+               ),
+               build_response('Área de Proteção Ambiental',
+                              'Área de Proteção Ambiental',
+                              bdt.area_protecao_ambiental
+               ),
+               build_response('Restrição Geotécnica',
+                             'Restrição Geotécnica',
+                             bdt.restricao_geotecnica
+               ),
+               build_response('Histórico de Contaminação',
+                              'Histórico de Contaminação',
+                              bdt.historico_contaminacao
+               ),
+               build_response('Patrimônio Histórico',
+                              'Patrimônio Histórico',
+                              bdt.tombamentos
+               )
                 #'Zoneamento' : bdt.zoneamento
-           }
+           ]
         }
 
 if __name__ == '__main__':
