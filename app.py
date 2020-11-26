@@ -119,7 +119,7 @@ class melhoramento_viario(Resource,):
         return bdt.melhoramento_viario
 
 @ns.route('/faixa_nao_edificavel/<string:setor>/<string:quadra>')
-class melhoramento_viario(Resource,):
+class faixa_nao_edificante(Resource,):
 
     @envelope
     def get(self,setor, quadra):
