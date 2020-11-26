@@ -1,7 +1,7 @@
 from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound
-from .helpers import build_response, parsear_zoneamento
+from .helpers import build_response, parsear_zoneamento, dados_endereco_iptu
 from .zon_his_especifico import param_constru_his, tx_permeab_his
 
 
@@ -366,6 +366,44 @@ class ApiBdtBuilder:
                 ]
             else:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except Fault as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {repr(e)}')
+
+    @property
+    def dados_lograouro_iptu(self):
+        try:
+            resp = self.api.consult_imovel_por_sql(self.setor, self.quadra, self.lote, self.digito)
+            if resp['Codigo'] == 0:
+                try:
+                    imovel = resp['imovel']
+                    if imovel:
+                        endereco = dados_endereco_iptu(imovel)
+                        return [
+                            build_response('Logradouro',
+                                           'Identificação do logradouro em que se situa o imóvel',
+                                           endereco['logradouro']
+                                           ),
+                            build_response('Numeração',
+                                           'Numeração de via do imóvel',
+                                           endereco['numeracao']),
+                            build_response('CEP',
+                                           'Código postal do imóvel',
+                                           endereco['cep']),
+                            build_response('CodLog',
+                                           'Código oficial do Logradouro na base de dados da Prefeitura',
+                                           endereco['codlog']),
+                            build_response('Bairro',
+                                           'Bairro em que se situa o imóvel',
+                                           endereco['bairro'])
+                        ]
+
+                    else:
+                        raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+                except KeyError:
+                    raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+            elif resp['Codigo'] == 507:
+                raise SQLNotFound(f'O Lote não foi encontrado: {self.setor}.{self.quadra}.{self.lote}-{self.digito}')
+
         except Fault as e:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {repr(e)}')
 

@@ -178,6 +178,15 @@ class tx_permeab_his(Resource):
 
         return bdt.tx_permeab_his
 
+@ns.route('/dados_endereco_iptu/<string:setor>/<string:quadra>/<string:lote>/<string:digito>')
+class endereco_iptu(Resource):
+
+    @envelope
+    def get(self, setor, quadra, lote, digito):
+        bdt = gerar_bdt(setor, quadra, lote, digito)
+
+        return bdt.dados_lograouro_iptu
+
 @ns.route('/bdt/<string:id>')
 class bdt(Resource):
 
