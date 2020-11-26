@@ -155,26 +155,20 @@ class ApiBdtBuilder:
         else:
             full_resp = []
             for obj in lista_melhor:
-                if obj['Resultado'] == 'NÃO':
+                if obj['Resultado'] == 'NÃO' and obj['MelhoramentoFaixa']=="MELHORAMENTO VIÁRIO":
                     obj_resp = [
                         build_response('Incidência de melhoramento viário',
                                        'Indica se há incidência de melhoramento viário ou faixa não edificável'
                                        'na quadra em que se situa o projeto',
-                                       False),
-                        build_response('Tipo de melhoramento',
-                                       'Identifica o tipo de melhoramento (viário ou faixa não edificável)',
-                                       obj['MelhoramentoFaixa'])
+                                       False)
                     ]
                     full_resp.append(obj_resp)
-                elif obj['Resultado'] == 'SIM':
+                elif obj['Resultado'] == 'SIM' and obj['MelhoramentoFaixa']=="MELHORAMENTO VIÁRIO":
                     obj_resp = [
                         build_response('Incidência de melhoramento viário',
-                                       'Indica se há incidência de melhoramento viário ou faixa não edificável'
+                                       'Indica se há incidência de melhoramento viário'
                                        'na quadra em que se situa o projeto',
                                        True),
-                        build_response('Tipo de melhoramento',
-                                       'Identifica o tipo de melhoramento (viário ou faixa não edificável)',
-                                       obj['MelhoramentoFaixa']),
                         build_response('Ano da norma',
                                        'Ano de publicação da norma que fundamenta o melhoramento viário',
                                        obj['AnoLeiMelhoramentoVigente']),
@@ -185,6 +179,55 @@ class ApiBdtBuilder:
                     ]
 
                     full_resp.append(obj_resp)
+            if not full_resp:
+                raise  UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+
+            return full_resp
+
+    @property
+    def faixa_nao_edificavel(self):
+        # to do: maybe reduce the size of this funcion with a helper
+
+        resp = self.api.consult_melhor_viario(self.setor, self.quadra)
+        try:
+            lista_melhor = resp['ArrayOfMelhoramentoViarioMelhoramentoViario']
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+
+        if not lista_melhor:
+            raise SQLNotFound(f'A quadra não foi encontrada: {self.setor}.{self.quadra}')
+        elif type(lista_melhor) is not list:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        # then there's a result that should be parsed
+        else:
+            full_resp = []
+            for obj in lista_melhor:
+                if obj['Resultado'] == 'NÃO' and obj['MelhoramentoFaixa'] == "FAIXA NÃO EDIFICÁVEL":
+                    obj_resp = [
+                        build_response('Incidência de faixa não edificável',
+                                       'Indica se há incidência de faixa não edificável'
+                                       'na quadra em que se situa o projeto',
+                                       False)
+                    ]
+                    full_resp.append(obj_resp)
+                elif obj['Resultado'] == 'SIM' and obj['MelhoramentoFaixa'] == "FAIXA NÃO EDIFICÁVEL":
+                    obj_resp = [
+                        build_response('Incidência de melhoramento viário',
+                                       'Indica se há incidência de melhoramento viário ou faixa não edificável'
+                                       'na quadra em que se situa o projeto',
+                                       True),
+                        build_response('Ano da norma',
+                                       'Ano de publicação da norma que fundamenta o melhoramento viário',
+                                       obj['AnoLeiMelhoramentoVigente']),
+                        build_response('Tipo da norma',
+                                       'Identifica o tipo da norma que fundamenta o melhoramento viário',
+                                       obj['IdentificadorTipoNorma']),
+
+                    ]
+
+                    full_resp.append(obj_resp)
+            if not full_resp:
+                raise  UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
             return full_resp
 
