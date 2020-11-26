@@ -7,6 +7,25 @@ def build_response(label, description, value):
             'description' : description,
             'value' : value}
 
+#HELPERES CIT
+
+def detalhes_tombamento(nivel):
+    try:
+        niveis_cit = pd.read_excel('data/niveis_tombamento_cit.xlsx')
+        labels = niveis_cit.iloc[0]
+        dados = niveis_cit.drop(0)
+        resp = dados[dados['nivel_tombamento']==nivel].to_dict(orient = 'records')[0]
+
+        final = []
+        for key, value in resp.items():
+            if value == 'SIM':
+                value = True
+            final.append(build_response(key, labels[key], value))
+
+        return final
+    except IndexError:
+        return []
+
 # HELPERS PARA O ZONEAMENTO
 
 def parsear_zoneamento(resp):
