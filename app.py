@@ -90,6 +90,14 @@ class melhoramento_viario(Resource,):
         bdt = gerar_bdt(setor, quadra)
         return bdt.melhoramento_viario
 
+@ns.route('/faixa_nao_edificavel/<string:setor>/<string:quadra>')
+class faixa_nao_edificante(Resource,):
+
+    @envelope
+    def get(self,setor, quadra):
+        bdt = gerar_bdt(setor, quadra)
+        return bdt.faixa_nao_edificavel
+
 @ns.route('/area_protecao_ambiental/<string:setor>/<string:quadra>')
 class area_protecao_ambiental(Resource):
 
