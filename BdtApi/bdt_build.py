@@ -2,7 +2,7 @@ from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound
 from .helpers import build_response, parsear_zoneamento
-from .zon_his_especifico import param_constru_his
+from .zon_his_especifico import param_constru_his, tx_permeab_his
 
 
 class ApiBdtBuilder:
@@ -388,6 +388,29 @@ class ApiBdtBuilder:
                     raise ZonaUsoNotFound(f'As zonas de uso encontradas nao possuem parametros para HIS: {zoneamento}')
                 else:
                     return parametros_final
+
+        except KeyError as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
+
+    @property
+    def tx_permeab_his(self):
+
+        resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+        try:
+            if resp['Codigo'] == 4:
+                raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
+            elif resp['Codigo'] == 0:
+                zoneamento = resp['Zoneamentos']['Zoneamento']
+                resp_final = []
+                for zona in zoneamento:
+                    tx = tx_permeab_his(zona)
+                    if tx:
+                        resp_final.append(tx)
+                if not resp_final:
+                    raise ZonaUsoNotFound(f'As zonas de uso encontradas nao possuem parametros para HIS: {zoneamento}')
+                return resp_final
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
 
         except KeyError as e:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')

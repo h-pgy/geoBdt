@@ -169,6 +169,15 @@ class param_constru_his(Resource):
 
         return bdt.param_constru_his
 
+@ns.route('/taxa_permeabilidade_HIS/<string:setor>/<string:quadra>/<string:lote>')
+class tx_permeab_his(Resource):
+
+    @envelope
+    def get(self, setor, quadra, lote):
+        bdt = gerar_bdt(setor, quadra, lote)
+
+        return bdt.tx_permeab_his
+
 @ns.route('/bdt/<string:id>')
 class bdt(Resource):
 
