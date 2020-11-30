@@ -29,10 +29,13 @@ def detalhes_tombamento(nivel):
 #HELPERS PARA DADOS IPTU/TPCL
 
 def pegar_rua_iptu(imovel):
-    tipo_logradouro = imovel['codTipoLogradouroField']['valueField'].strip()
-    titulo_logradouro = imovel['txtTituloLogradouroField']['valueField'].strip()
+    tipo_logradouro = imovel['codTipoLogradouroField']['valueField'] or ''
+    tipo_logradouro = tipo_logradouro.strip()
+    titulo_logradouro = imovel['txtTituloLogradouroField']['valueField'] or ''
+    titulo_logradouro= titulo_logradouro.strip()
     preposicao_log = imovel['txtPreposicaoLogradouroField']['valueField'] or ''
-    nom_logradouro = imovel['nomLogradouroField']['valueField'].strip()
+    nom_logradouro = imovel['nomLogradouroField']['valueField'] or ''
+    nom_logradouro = nom_logradouro.strip()
     rua_completo = ' '.join([tipo_logradouro,
                              titulo_logradouro,
                              preposicao_log,
