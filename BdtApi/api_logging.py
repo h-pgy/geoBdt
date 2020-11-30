@@ -21,6 +21,7 @@ def log_request(func):
                     request_datetime = agora,
                     bdt_id = self.bdt_id
                 )
+                print(repr(func))
                 print('HEADERS')
                 print(client.transport.request_headers)
                 print('REQUEST')
