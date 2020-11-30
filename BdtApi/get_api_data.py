@@ -127,6 +127,6 @@ class ApiDataGetter:
     @log_request
     def consult_logradouro_por_cep(self, cep, client):
 
-        resp = client.service['ConsultarLogradouroPorCEP.v1'](cep, 0)
+        resp = client.service['ConsultarLogradouroPorCEP.v1'](cep, 1)
 
         return resp
