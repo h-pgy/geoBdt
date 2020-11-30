@@ -21,6 +21,12 @@ def log_request(func):
                     request_datetime = agora,
                     bdt_id = self.bdt_id
                 )
+                print('HEADERS')
+                print(client.transport.request_headers)
+                print('REQUEST')
+                print(client.transport.xml_request)
+                print('RESPONSE')
+                print(client.transport.xml_response)
                 db.session.add(bdt_log)
                 db.session.commit()
                 return result
