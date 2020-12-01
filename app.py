@@ -5,7 +5,7 @@ from flask_restx import Resource, Api, fields
 from config import db_path
 from models import db, BdtLog, BdtRequestLog
 from BdtApi.bdt_build import ApiBdtBuilder
-from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, BDTNotFound
+from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, BDTNotFound, ZonaUsoNotFound
 from BdtApi.helpers import build_response
 
 app = Flask(__name__)
@@ -33,7 +33,14 @@ def handle_sql_not_found(e):
             'message' : str(e)}, 404
 
 @ns.errorhandler(CEPNotFound)
-def handle_sql_not_found(e):
+def handle_cep_not_found(e):
+
+    return {'success' : False,
+            'data' : [],
+            'message' : str(e)}, 404
+
+@ns.errorhandler(ZonaUsoNotFound)
+def handle_zona_not_found(e):
 
     return {'success' : False,
             'data' : [],
