@@ -194,6 +194,16 @@ class tx_permeab_his(Resource):
 
         return bdt.tx_permeab_his
 
+@ns.route('/empreendimento_aceito/<string:setor>/<string:quadra>/<string:lote>/<string:tipo_empreendimento>')
+class empreendimento_aceito(Resource):
+
+    @envelope
+    def get(self, setor, quadra, lote, tipo_empreendimento):
+
+        bdt = gerar_bdt(setor, quadra, lote)
+
+        return bdt.zona_uso_aceita_his_ou_hmp(tipo_empreendimento)
+
 @ns.route('/dados_endereco_iptu/<string:setor>/<string:quadra>/<string:lote>/<string:digito>')
 class endereco_iptu(Resource):
 

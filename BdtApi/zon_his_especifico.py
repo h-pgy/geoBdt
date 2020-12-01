@@ -1,5 +1,6 @@
 import pandas as pd
 from .helpers import build_response
+from .proj_errors import ZonaUsoNotFound
 
 def _pegar_cota_ambiental(dici_resp):
 
@@ -52,3 +53,19 @@ def param_constru_his(cod_zona_uso):
         return final
     except IndexError:
         return []
+
+
+def checar_tipologia_empreendimento(cod_zona, tipologia):
+
+    cod_zona = int(cod_zona)
+    df = pd.read_excel('data/dados_zoneamento_his.xlsx', sheet_name='categoria_admitida_por_zona')
+    tipologias_aceitas = set()
+    try:
+        for i, row in df[df['codigo_siszon'] == cod_zona].T.drop(['codigo_siszon', 'sigla_zona']).iterrows():
+            if row.values[0] == 1:
+                tipologias_aceitas.add(row.name.lower().strip())
+        print('AAAAAAAAAAAAAAAAAAAA')
+        print(tipologias_aceitas)
+        return tipologia.lower().strip() in tipologias_aceitas
+    except IndexError:
+        raise ZonaUsoNotFound(f'A zona de uso {cod_zona} não possui parâmetros para HIS')

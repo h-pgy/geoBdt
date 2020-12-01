@@ -2,7 +2,7 @@ from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound
 from .helpers import build_response, parsear_zoneamento, dados_endereco_iptu, detalhes_tombamento
-from .zon_his_especifico import param_constru_his, tx_permeab_his
+from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento
 
 
 class ApiBdtBuilder:
@@ -499,6 +499,24 @@ class ApiBdtBuilder:
         except KeyError as e:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
 
+    def zona_uso_aceita_his_ou_hmp(self, tipologia_empreendimento):
+
+        resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+        try:
+            if resp['Codigo'] == 4:
+                raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
+            elif resp['Codigo'] == 0: #zona de uso é sempre o primeiro item
+                zoneamento = resp['Zoneamentos']['Zoneamento']
+                zona_uso = zoneamento[0]
+                cod = zona_uso['CodigoZoneamento'][:2]
+                check = checar_tipologia_empreendimento(cod, tipologia_empreendimento)
+                return build_response(
+                    f'Aceita {tipologia_empreendimento}',
+                    f'Empreendimento de tipo {tipologia_empreendimento} é permitido na zona de uso do imóvel?',
+                    check)
+
+        except KeyError as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
 
 
     @property
