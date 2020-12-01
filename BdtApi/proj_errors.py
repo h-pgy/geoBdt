@@ -32,3 +32,9 @@ class BDTNotFound(http_exceptions.InternalServerError):
 
     code = 404
     description = 'O BDT nao foi encontrado'
+
+class ParametroInvalido(http_exceptions.InternalServerError):
+    """Raised when a invalid parameter was given when consuming the service"""
+
+    code = 500
+    description = 'O parâmetro enviado é inválido'

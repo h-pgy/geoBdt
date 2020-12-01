@@ -5,7 +5,12 @@ from flask_restx import Resource, Api, fields
 from config import db_path
 from models import db, BdtLog, BdtRequestLog
 from BdtApi.bdt_build import ApiBdtBuilder
-from BdtApi.proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, BDTNotFound, ZonaUsoNotFound
+from BdtApi.proj_errors import (SQLNotFound,
+                                UnexpectedWebserviceResponse,
+                                CEPNotFound,
+                                BDTNotFound,
+                                ZonaUsoNotFound,
+                                ParametroInvalido)
 from BdtApi.helpers import build_response
 
 app = Flask(__name__)
@@ -53,8 +58,15 @@ def handle_sql_not_found(e):
             'data' : [],
             'message' : str(e)}, 404
 
-@ns.errorhandler(UnexpectedWebserviceResponse)
+@ns.errorhandler(ParametroInvalido)
 def handle_unexpected_resp(e):
+
+    return {'success' : False,
+            'data' : [],
+            'message' : str(e)}, 500
+
+@ns.errorhandler(UnexpectedWebserviceResponse)
+def handle_parametro_invalido(e):
 
     return {'success' : False,
             'data' : [],
