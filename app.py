@@ -10,7 +10,8 @@ from BdtApi.proj_errors import (SQLNotFound,
                                 CEPNotFound,
                                 BDTNotFound,
                                 ZonaUsoNotFound,
-                                ParametroInvalido)
+                                ParametroInvalido,
+                                CPFouCNPJNotFound)
 from BdtApi.helpers import build_response
 
 app = Flask(__name__)
@@ -52,7 +53,14 @@ def handle_zona_not_found(e):
             'message' : str(e)}, 404
 
 @ns.errorhandler(BDTNotFound)
-def handle_sql_not_found(e):
+def handle_bdt_not_found(e):
+
+    return {'success' : False,
+            'data' : [],
+            'message' : str(e)}, 404
+
+@ns.errorhandler(CPFouCNPJNotFound)
+def handle_cpf_cnpj_not_found(e):
 
     return {'success' : False,
             'data' : [],
@@ -231,6 +239,15 @@ class endereco_iptu(Resource):
         bdt = gerar_bdt(setor, quadra, lote, digito)
 
         return bdt.dados_lograouro_iptu
+
+@ns.route('/ccm_ativo/<string:cpf_ou_cnpj>/<string:numero>')
+class endereco_iptu(Resource):
+
+    @envelope
+    def get(self, cpf_ou_cnpj, numero):
+        bdt = gerar_bdt(None, None)
+
+        return bdt.ccm_ativo(cpf_ou_cnpj, numero)
 
 @ns.route('/bdt/<string:id>')
 class bdt(Resource):

@@ -1,6 +1,6 @@
 from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
-from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound
+from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
 from .helpers import build_response, parsear_zoneamento, dados_endereco_iptu, detalhes_tombamento
 from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento
 
@@ -288,6 +288,47 @@ class ApiBdtBuilder:
                 raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
         except KeyError:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+
+    def ccm_ativo(self, cpf_ou_cnpj, numero):
+
+        numero = str(numero)
+        cpf_ou_cnpj = cpf_ou_cnpj.lower().strip()
+        try:
+            if cpf_ou_cnpj == 'cnpj':
+
+                if len(numero) == 14:
+                    resp = self.api.consult_ccm(cpf_ou_cnpj, numero)
+                else:
+                    raise ParametroInvalido(f'O número do {cpf_ou_cnpj} deve ser composto de 14 digitos numéricos')
+            elif cpf_ou_cnpj == 'cpf':
+                if len(numero) == 11:
+                    resp = self.api.consult_ccm(cpf_ou_cnpj, numero)
+                else:
+                    raise ParametroInvalido(f'O número do {cpf_ou_cnpj} deve ser composto de 11 digitos numéricos')
+
+            else:
+                raise ParametroInvalido('Aceitamos apenas os parâmetros CPF ou CNPJ')
+
+            if resp['Codigo'] == 0:
+
+                status = resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario'] \
+                            ['DadosContribuinteMobiliarioTipo'][0]['codStatusCadastroContribuintesMobiliarios']
+
+                valido = status == 1
+
+                return build_response('CCM ativo?',
+                                      'Identifica se o Cadastro de Contribuinte Imobiliário para o CNPJ ou CPF está ativo',
+                                      valido)
+
+            elif resp['Codigo'] == 508:
+                raise CPFouCNPJNotFound(f'O {cpf_ou_cnpj} de numero {numero} não foi encontrado')
+
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no consumo da webservice: {resp}')
+
+
+        except (Fault, KeyError) as e:
+            raise UnexpectedWebserviceResponse(f'Erro no consumo da webservice: {repr(e)}')
 
     @property
     def historico_contaminacao(self):

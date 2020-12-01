@@ -130,3 +130,24 @@ class ApiDataGetter:
         resp = client.service['ConsultarLogradouroPorCEP.v1'](cep, 1)
 
         return resp
+
+    @create_client()
+    @log_request
+    def consult_ccm(self, cpf_ou_cnpj, numero, client):
+
+        cpf_ou_cnpj = cpf_ou_cnpj.lower().strip()
+
+        if  cpf_ou_cnpj == 'cnpj':
+
+            resp = client.service['ConsultarDadosEstabelecimento.v1'](dadosEntrada = {'CNPJ' : numero})
+
+            return resp
+
+        elif cpf_ou_cnpj == 'cpf':
+
+            resp = client.service['ConsultarDadosEstabelecimento.v1'](dadosEntrada = {'CPF' : numero})
+
+            return resp
+
+        else:
+            return {}
