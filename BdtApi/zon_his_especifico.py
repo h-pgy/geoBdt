@@ -64,8 +64,16 @@ def checar_tipologia_empreendimento(cod_zona, tipologia):
         for i, row in df[df['codigo_siszon'] == cod_zona].T.drop(['codigo_siszon', 'sigla_zona']).iterrows():
             if row.values[0] == 1:
                 tipologias_aceitas.add(row.name.lower().strip())
-        print('AAAAAAAAAAAAAAAAAAAA')
-        print(tipologias_aceitas)
         return tipologia.lower().strip() in tipologias_aceitas
     except IndexError:
         raise ZonaUsoNotFound(f'A zona de uso {cod_zona} não possui parâmetros para HIS')
+
+
+def permite_declaratorio(cod_zona):
+    df = pd.read_excel('data/zona_uso_permite_declaratorio.xlsx')
+
+    permite = df[df['Cod.'] == cod_zona]['PERMITE_HIS_DECLARATORIO'][0]
+
+    if permite:
+        return True
+    return False
