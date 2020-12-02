@@ -2,7 +2,7 @@ from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
 from .helpers import build_response, parsear_zoneamento, dados_endereco_iptu, detalhes_tombamento
-from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento
+from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento, zona_uso_permite_declaratorio
 
 
 class ApiBdtBuilder:
@@ -539,6 +539,43 @@ class ApiBdtBuilder:
 
         except KeyError as e:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
+
+    @property
+    def zona_uso_permite_his_declaratorio(self):
+
+        resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+        try:
+            if resp['Codigo'] == 4:
+                raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
+            elif resp['Codigo'] == 0:
+                resp_final = []
+                zoneamento = resp['Zoneamentos']['Zoneamento']
+                for zona in zoneamento:
+                    cod = zona['CodigoZoneamento'][:2]
+                    try:
+                        permite = zona_uso_permite_declaratorio(cod)
+                        resp_final.append(permite)
+                    except IndexError:
+                        pass
+                #se nao encontrou nenhuma zona de uso, levanta erro
+                if not resp_final:
+                    return ZonaUsoNotFound(f'As zonas de uso encontradas nao possuem parametros para HIS: {zoneamento}')
+                #checa se tem mais de uma zona de uso
+                elif len(resp_final) > 1:
+                    return build_response(
+                            'Zona de uso permite declaratório?',
+                            'Identifica se a zona de uso permite HIS declaratório',
+                            False)
+                #retorna a resposta
+                return build_response(
+                            'Zona de uso permite declaratório?',
+                            'Identifica se a zona de uso permite HIS declaratório',
+                            resp_final[0])
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+
+        except KeyError:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: Chave não encontrada {resp}')
 
     def zona_uso_aceita_his_ou_hmp(self, tipologia_empreendimento):
 

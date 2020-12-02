@@ -69,10 +69,12 @@ def checar_tipologia_empreendimento(cod_zona, tipologia):
         raise ZonaUsoNotFound(f'A zona de uso {cod_zona} não possui parâmetros para HIS')
 
 
-def permite_declaratorio(cod_zona):
+def zona_uso_permite_declaratorio(cod_zona):
+
+    cod_zona = int(cod_zona)
     df = pd.read_excel('data/zona_uso_permite_declaratorio.xlsx')
 
-    permite = df[df['Cod.'] == cod_zona]['PERMITE_HIS_DECLARATORIO'][0]
+    permite = df[df['Cod.'] == cod_zona]['PERMITE_HIS_DECLARATORIO'].iloc[0]
 
     if permite:
         return True

@@ -231,6 +231,16 @@ class empreendimento_aceito(Resource):
 
         return bdt.zona_uso_aceita_his_ou_hmp(tipo_empreendimento)
 
+@ns.route('/zona_uso_permite_declaratorio/<string:setor>/<string:quadra>/<string:lote>')
+class permite_declaratorio(Resource):
+
+    @envelope
+    def get(self, setor, quadra, lote):
+        bdt = gerar_bdt(setor, quadra, lote)
+
+        return bdt.zona_uso_permite_his_declaratorio
+
+
 @ns.route('/dados_endereco_iptu/<string:setor>/<string:quadra>/<string:lote>/<string:digito>')
 class endereco_iptu(Resource):
 
