@@ -1,7 +1,7 @@
 from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
-from .helpers import build_response, parsear_zoneamento, dados_endereco_iptu, detalhes_tombamento
+from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento
 from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento, zona_uso_permite_declaratorio
 
 
@@ -612,51 +612,24 @@ class ApiBdtBuilder:
                 raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
             elif resp['Codigo'] == 0:
 
+                zonas = resp['Zoneamentos']['Zoneamento']
                 zoneamento_formatado = []
-                zoneamento = parsear_zoneamento(resp)
-                for zona in zoneamento:
-                    if zona['TipoZoneamento'] == 'Zona de Uso':
-
-                        formated = [
-                            build_response('Sigla',
-                                           'Sigla da Zona de Uso',
-                                           zona['SiglaZonaUso']),
-                            build_response('Descrição',
-                                           'Descrição da zona de uso',
-                                           zona['DescricaoZonaUso']),
-                            build_response('Legislação',
-                                           'Legislação que cria/regulamenta a zona de uso',
-                                           zona['Legislacao'])
-                        ]
-
-                    elif zona['TipoZoneamento'] == 'Setores da Macroárea de Estruturação Metropolitana':
-
-                        formated = [
-                            build_response('Setor',
-                                           'Nome do setor da MEM',
-                                           zona['NomeSetor']),
-                            build_response('Código',
-                                           'Código do setor da MEM',
-                                           zona['CodigoSetor'])
-                        ]
-
-                    elif zona['TipoZoneamento'] == 'Quota Ambiental':
-
-                        formated = [
-                            build_response('PA',
-                                           'Perímetro de Qualificação Ambiental',
-                                           zona['Perímetro de Qualificação Ambiental'])
-                        ]
-
-                    elif zona['TipoZoneamento'] == 'Perímetro de Incentivo ao Desenvolvimento Econômico':
-                        formated = [
-                            build_response('PI',
-                                           'Perímetro de Incentivo ao Desenvolvimento Econômico',
-                                           zona['CodigoPerimetro'])
-                        ]
-
-
-                    zoneamento_formatado.append(formated)
+                for zona in zonas:
+                    parsed = pegar_dados_zoneamento(zona)
+                    response = [build_response('Sigla',
+                                               'Sigla da Zona',
+                                               parsed['sigla']),
+                                build_response('Descrição',
+                                               'Descrição da zona',
+                                               parsed['descricao']),
+                                build_response('Tipo de Zoneamento',
+                                               'Identifica o tipo de zoneamento do imóvel',
+                                               parsed['tipo_zoneamento'])]
+                    if parsed.get('perimetro_ambiental'):
+                        response.append(build_response('Perímetro Ambiental',
+                                                       'Identificação do Perímetro Ambiental em que se situa o imóvel',
+                                                       parsed['perimetro_ambiental']))
+                    zoneamento_formatado.append(response)
 
                 return zoneamento_formatado
 
