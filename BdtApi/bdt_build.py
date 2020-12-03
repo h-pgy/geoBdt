@@ -465,6 +465,12 @@ class ApiBdtBuilder:
                     imovel = resp['imovel']
                     if imovel:
                         endereco = dados_endereco_iptu(imovel)
+                        cep = str(endereco['cep'])
+                        while len(cep) < 8:
+                            cep = '0' + cep
+                        codlog = str(endereco['codlog'])
+                        while len(codlog) < 6:
+                            codlog = '0' + codlog
                         return [
                             build_response('Logradouro',
                                            'Identificação do logradouro em que se situa o imóvel',
@@ -475,10 +481,10 @@ class ApiBdtBuilder:
                                            endereco['numeracao']),
                             build_response('CEP',
                                            'Código postal do imóvel',
-                                           endereco['cep']),
+                                           cep),
                             build_response('CodLog',
                                            'Código oficial do Logradouro na base de dados da Prefeitura',
-                                           endereco['codlog']),
+                                           codlog),
                             build_response('Bairro',
                                            'Bairro em que se situa o imóvel',
                                            endereco['bairro'])
