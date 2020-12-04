@@ -316,8 +316,10 @@ class bdt(Resource):
                 build_response('Patrimônio Histórico',
                                'Patrimônio Histórico',
                                bdt.tombamentos
-                               )
-                # 'Zoneamento' : bdt.zoneamento
+                               ),
+                build_response('Zoneamento',
+                               'Zoneamento',
+                               bdt.zoneamento)
             ]
         }
 

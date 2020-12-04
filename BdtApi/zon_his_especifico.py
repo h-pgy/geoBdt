@@ -47,7 +47,12 @@ def param_constru_his(cod_zona_uso):
         final = []
         for key, value in resp.items():
             if pd.isna(value):
-                value = None
+                if 'máxim' in labels[key].lower():
+                    value = 10**9
+                elif 'mínim' in labels[key].lower():
+                    value = -1
+                else:
+                    raise ValueError
             final.append(build_response(key, labels[key], value))
 
         return final
