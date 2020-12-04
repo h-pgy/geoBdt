@@ -250,6 +250,15 @@ class endereco_iptu(Resource):
 
         return bdt.dados_lograouro_iptu
 
+@ns.route('/subprefeitura/<string:setor>/<string:quadra>/<string:lote>')
+class subprefeitura(Resource):
+
+    @envelope
+    def get(self, setor, quadra, lote):
+        bdt = gerar_bdt(setor, quadra, lote)
+
+        return bdt.subprefeitura
+
 @ns.route('/ccm_ativo/<string:cpf_ou_cnpj>/<string:numero>')
 class endereco_iptu(Resource):
 

@@ -75,3 +75,10 @@ def pegar_dados_zoneamento(zona):
         perimetro = int(zona['CodigoZoneamento'][-6:-2])
         dados_zon['perimetro_ambiental'] = f'PA-{perimetro}'
         return dados_zon
+
+
+def pegar_subprefeitura(zona):
+    cod_subprefeitura = int(zona['CodigoZoneamento'][-2:])
+    df = pd.read_excel('data/codigos_zoneamento_SMDU.xlsx', sheet_name='codigos_subprefeituras')
+
+    return df[df['codigo'] == cod_subprefeitura].to_dict(orient='records')[0]

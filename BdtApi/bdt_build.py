@@ -1,7 +1,7 @@
 from zeep.exceptions import Fault
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
-from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento
+from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento, pegar_subprefeitura
 from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento, zona_uso_permite_declaratorio
 
 
@@ -642,6 +642,30 @@ class ApiBdtBuilder:
         except KeyError as e:
             raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
 
+    @property
+    def subprefeitura(self):
+
+        resp = self.api.obter_zoneamento(self.setor, self.quadra, self.lote)
+        try:
+            if resp['Codigo'] == 4:
+                raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
+            elif resp['Codigo'] == 0:
+                zona = resp['Zoneamentos']['Zoneamento'][0]
+                try:
+                    subs = pegar_subprefeitura(zona)
+                    return [build_response('Subprefeitura',
+                                           'Identificação da subprefeitura em que se situa o imóvel',
+                                           subs['descricao']),
+                            build_response('Sigla',
+                                           'Sigla da subprefeitura em que se situa o imóvel',
+                                           subs['sigla'])
+                            ]
+                except IndexError:
+                    raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+            else:
+                raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
+        except KeyError as e:
+            raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp} {repr(e)}')
 
 
 
