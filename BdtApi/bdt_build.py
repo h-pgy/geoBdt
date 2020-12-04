@@ -616,6 +616,7 @@ class ApiBdtBuilder:
                 zoneamento_formatado = []
                 for zona in zonas:
                     parsed = pegar_dados_zoneamento(zona)
+                    legislacao = f"{zona['CodigoTipoLegislacao']}{zona['NumeroLegislacao']} de {zona['AnoLegislacao']}"
                     response = [build_response('Sigla',
                                                'Sigla da Zona',
                                                parsed['sigla']),
@@ -624,7 +625,10 @@ class ApiBdtBuilder:
                                                parsed['descricao']),
                                 build_response('Tipo de Zoneamento',
                                                'Identifica o tipo de zoneamento do imóvel',
-                                               parsed['tipo_zoneamento'])]
+                                               parsed['tipo_zoneamento']),
+                                build_response('Legislação',
+                                               "Legislação que cria/regulamenta a zona",
+                                               legislacao)]
                     if parsed.get('perimetro_ambiental'):
                         response.append(build_response('Perímetro Ambiental',
                                                        'Identificação do Perímetro Ambiental em que se situa o imóvel',
