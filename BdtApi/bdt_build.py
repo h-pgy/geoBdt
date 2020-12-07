@@ -313,12 +313,21 @@ class ApiBdtBuilder:
 
                 status = resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario'] \
                             ['DadosContribuinteMobiliarioTipo'][0]['codStatusCadastroContribuintesMobiliarios']
+                num_ccm = resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario'] \
+                    ['DadosContribuinteMobiliarioTipo'][0]['codCadastroContribuintesMobiliarios']
+                num_ccm = str(num_ccm)
+
+                while len(num_ccm) < 8:
+                    num_ccm = '0' + num_ccm
 
                 valido = status == 1
 
-                return build_response('CCM ativo?',
+                return [build_response('CCM ativo?',
                                       'Identifica se o Cadastro de Contribuinte Imobiliário para o CNPJ ou CPF está ativo',
-                                      valido)
+                                      valido),
+                        build_response('Número CCM',
+                                       'Número de Cadastro do Contribuinte Mobiliário',
+                                       num_ccm)]
 
             elif resp['Codigo'] == 508:
                 raise CPFouCNPJNotFound(f'O {cpf_ou_cnpj} de numero {numero} não foi encontrado')
