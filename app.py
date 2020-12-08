@@ -67,14 +67,14 @@ def handle_cpf_cnpj_not_found(e):
             'message' : str(e)}, 404
 
 @ns.errorhandler(ParametroInvalido)
-def handle_unexpected_resp(e):
+def handle_parametro_invalido(e):
 
     return {'success' : False,
             'data' : [],
             'message' : str(e)}, 500
 
 @ns.errorhandler(UnexpectedWebserviceResponse)
-def handle_parametro_invalido(e):
+def handle_unexpected_resp(e):
 
     return {'success' : False,
             'data' : [],
