@@ -1,4 +1,5 @@
 from zeep.exceptions import Fault
+from zeep.helpers import serialize_object
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
 from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento, pegar_subprefeitura
@@ -470,34 +471,43 @@ class ApiBdtBuilder:
         try:
             resp = self.api.consult_imovel_por_sql(self.setor, self.quadra, self.lote, self.digito)
             if resp['Codigo'] == 0:
+                resp = serialize_object(resp, dict)
                 try:
                     imovel = resp['imovel']
                     if imovel:
-                        endereco = dados_endereco_iptu(imovel)
-                        cep = str(endereco['cep'])
-                        while len(cep) < 8:
-                            cep = '0' + cep
-                        codlog = str(endereco['codlog'])
-                        while len(codlog) < 6:
-                            codlog = '0' + codlog
-                        return [
-                            build_response('Logradouro',
-                                           'Identificação do logradouro em que se situa o imóvel',
-                                           endereco['logradouro']
-                                           ),
-                            build_response('Numeração',
-                                           'Numeração de via do imóvel',
-                                           endereco['numeracao']),
-                            build_response('CEP',
-                                           'Código postal do imóvel',
-                                           cep),
-                            build_response('CodLog',
-                                           'Código oficial do Logradouro na base de dados da Prefeitura',
-                                           codlog),
-                            build_response('Bairro',
-                                           'Bairro em que se situa o imóvel',
-                                           endereco['bairro'])
-                        ]
+                        for key, value in imovel.items():
+                            if value:
+
+                                endereco = dados_endereco_iptu(imovel)
+                                cep = str(endereco['cep'])
+                                while len(cep) < 8:
+                                    cep = '0' + cep
+                                codlog = str(endereco['codlog'])
+                                while len(codlog) < 6:
+                                    codlog = '0' + codlog
+                                return [
+                                    build_response('Logradouro',
+                                                   'Identificação do logradouro em que se situa o imóvel',
+                                                   endereco['logradouro']
+                                                   ),
+                                    build_response('Numeração',
+                                                   'Numeração de via do imóvel',
+                                                   endereco['numeracao']),
+                                    build_response('CEP',
+                                                   'Código postal do imóvel',
+                                                   cep),
+                                    build_response('CodLog',
+                                                   'Código oficial do Logradouro na base de dados da Prefeitura',
+                                                   codlog),
+                                    build_response('Bairro',
+                                                   'Bairro em que se situa o imóvel',
+                                                   endereco['bairro'])
+                                ]
+
+
+                        #significa que o imovel veio sem nenhum valor - acontece quando foi cancelado
+                        else:
+                            raise SQLNotFound(f'O Lote foi cancelado e/ou não possui dados cadastrados: {self.setor}.{self.quadra}.{self.lote}-{self.digito}')
 
                     else:
                         raise UnexpectedWebserviceResponse(f'Erro no formato da resposta: {resp}')
