@@ -1,13 +1,14 @@
 from requests import Session
 from requests.packages import urllib3
 from zeep import Client
-from zeep.transports import Transport
+from zeep.cache import InMemoryCache
 from zeep import Settings
 import functools
-from config import p_pwd_cac,p_usr_cac, wsdl_path_intra
+from .config import p_pwd_cac,p_usr_cac, wsdl_path_intra
+from .custom_transports import LoggerTransport
 
 
-def create_client_intranet(auth_headers, wsdl_path_intra):
+def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_timeout = 60):
     '''Creates client for working in PMSP intranet envirnoment.
     Must use intranet wsdl path'''
 
@@ -21,10 +22,15 @@ def create_client_intranet(auth_headers, wsdl_path_intra):
 
     settings = Settings(extra_http_headers=auth_headers,
                         force_https=False)
-
-    client = Client(wsdl_path_intra,
-                    transport=Transport(session=session),
-                    settings=settings)
+    if cache:
+        cache = InMemoryCache(cache_timeout)
+        client = Client(wsdl_path_intra,
+                        transport=LoggerTransport(session=session, cache = cache),
+                        settings=settings)
+    else:
+        client = Client(wsdl_path_intra,
+                        transport=LoggerTransport(session=session),
+                        settings=settings)
     return client
 
 auth_headers = {
