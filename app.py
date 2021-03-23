@@ -368,12 +368,21 @@ class endereco_iptu(Resource):
 
     @envelope
     def get(self, sql):
-        sql, digito = tuple(sql.split('-'))
-        setor, quadra, lote = tuple(sql.split('.'))
+        if request.args.get('sql'):
+            sql_list = request.args.get('sql').split(',')
+            response = []
+            for sql in sql_list:
+                sql, digito = tuple(sql.split('-'))
+                setor, quadra, lote = tuple(sql.split('.'))
+                bdt = gerar_bdt(setor, quadra, lote, digito)
+                response.append({ 'label': sql, 'description': sql, 'value': bdt.dados_lograouro_iptu })
+            return response
+        else:
+            sql, digito = tuple(sql.split('-'))
+            setor, quadra, lote = tuple(sql.split('.'))
+            bdt = gerar_bdt(setor, quadra, lote, digito)
+            return bdt.dados_lograouro_iptu
 
-        bdt = gerar_bdt(setor, quadra, lote, digito)
-
-        return bdt.dados_lograouro_iptu
 
 @ns.route('/subprefeitura/<string:sql>')
 class subprefeitura(Resource):
