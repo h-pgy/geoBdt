@@ -311,17 +311,18 @@ class ApiBdtBuilder:
                 raise ParametroInvalido('Aceitamos apenas os parâmetros CPF ou CNPJ')
 
             if resp['Codigo'] == 0:
+                for ccm in resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario']\
+                            ['DadosContribuinteMobiliarioTipo']:
+                    status = ccm['codStatusCadastroContribuintesMobiliarios']
+                    num_ccm = ccm['codCadastroContribuintesMobiliarios']
+                    num_ccm = str(num_ccm)
 
-                status = resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario'] \
-                            ['DadosContribuinteMobiliarioTipo'][0]['codStatusCadastroContribuintesMobiliarios']
-                num_ccm = resp['DadosHistoricoCadastralTipo']['lstContribuinteMobiliario'] \
-                    ['DadosContribuinteMobiliarioTipo'][0]['codCadastroContribuintesMobiliarios']
-                num_ccm = str(num_ccm)
+                    while len(num_ccm) < 8:
+                        num_ccm = '0' + num_ccm
 
-                while len(num_ccm) < 8:
-                    num_ccm = '0' + num_ccm
-
-                valido = status == 1
+                    valido = status == 1
+                    if valido:
+                        break
 
                 return [build_response('CCM ativo?',
                                       'Identifica se o Cadastro de Contribuinte Imobiliário para o CNPJ ou CPF está ativo',
