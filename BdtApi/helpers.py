@@ -75,6 +75,10 @@ def pegar_dados_zoneamento(zona):
         perimetro = int(zona['CodigoZoneamento'][-6:-2])
         dados_zon['perimetro_ambiental'] = f'PA-{perimetro}'
         return dados_zon
+    elif tipo == 'Perimetro de Incentivo ao Desenvolvimento Economico':
+        return dados_zon
+    else:
+        print(zona)
 
 
 def pegar_subprefeitura(zona):
