@@ -64,6 +64,7 @@ def pegar_dados_zoneamento(zona):
     dados_zon = df[df['codigo'] == cod_zona].to_dict(orient='records')[0]
     tipo = dados_zon['tipo_zoneamento']
     if tipo == 'Zona de Uso':
+        dados_zon['codigo_zoneamento'] = cod_zona
         return dados_zon
     elif tipo == 'Macroarea e Setores da MEM':
         perimetro = int(zona['CodigoZoneamento'][-6:-2])
