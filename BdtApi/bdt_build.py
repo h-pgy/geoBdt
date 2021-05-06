@@ -653,6 +653,10 @@ class ApiBdtBuilder:
                         response.append(build_response('Perímetro Ambiental',
                                                        'Identificação do Perímetro Ambiental em que se situa o imóvel',
                                                        parsed['perimetro_ambiental']))
+                    elif parsed.get('codigo_zoneamento'):
+                        response.append(build_response('Código da Zona de Uso',
+                                                       'Código identificador da Zona de Uso em que se situa o imóvel',
+                                                       parsed['codigo_zoneamento']))
                     zoneamento_formatado.append(response)
 
                 return zoneamento_formatado
