@@ -87,3 +87,12 @@ def pegar_subprefeitura(zona):
     df = pd.read_excel('data/codigos_zoneamento_SMDU.xlsx', sheet_name='codigos_subprefeituras')
 
     return df[df['codigo'] == cod_subprefeitura].to_dict(orient='records')[0]
+
+def is_zona_uso(cod_zona):
+
+    cod_zona = int(cod_zona) #certifica que é num
+
+    if cod_zona >= 24 and cod_zona <= 95 and cod_zona !=89:
+        return True
+    else:
+        return False

@@ -2,7 +2,7 @@ from zeep.exceptions import Fault
 from zeep.helpers import serialize_object
 from .get_api_data import ApiDataGetter
 from .proj_errors import SQLNotFound, UnexpectedWebserviceResponse, CEPNotFound, ZonaUsoNotFound, ParametroInvalido, CPFouCNPJNotFound
-from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento, pegar_subprefeitura
+from .helpers import build_response, pegar_dados_zoneamento, dados_endereco_iptu, detalhes_tombamento, pegar_subprefeitura, is_zona_uso
 from .zon_his_especifico import param_constru_his, tx_permeab_his, checar_tipologia_empreendimento, zona_uso_permite_declaratorio
 
 
@@ -532,9 +532,11 @@ class ApiBdtBuilder:
                 zoneamento = resp['Zoneamentos']['Zoneamento']
                 for zona in zoneamento:
                     cod = zona['CodigoZoneamento'][:2]
-                    parametros = param_constru_his(cod)
-                    if parametros:
-                        parametros_final.append(parametros)
+                    if is_zona_uso(cod):
+                        parametros = param_constru_his(cod)
+                        if parametros:
+                            parametros_final.append(parametros)
+
                 if not parametros_final:
                     raise ZonaUsoNotFound(f'As zonas de uso encontradas nao possuem parametros para HIS: {zoneamento}')
                 else:
