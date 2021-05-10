@@ -580,11 +580,12 @@ class ApiBdtBuilder:
                 zoneamento = resp['Zoneamentos']['Zoneamento']
                 for zona in zoneamento:
                     cod = zona['CodigoZoneamento'][:2]
-                    try:
-                        permite = zona_uso_permite_declaratorio(cod)
-                        resp_final.append(permite)
-                    except IndexError:
-                        pass
+                    if is_zona_uso(cod):
+                        try:
+                            permite = zona_uso_permite_declaratorio(cod)
+                            resp_final.append(permite)
+                        except IndexError:
+                            pass
                 #se nao encontrou nenhuma zona de uso, levanta erro
                 if not resp_final:
                     return ZonaUsoNotFound(f'As zonas de uso encontradas nao possuem parametros para HIS: {zoneamento}')
