@@ -609,10 +609,13 @@ class ApiBdtBuilder:
         try:
             if resp['Codigo'] == 4:
                 raise SQLNotFound(f'O lota não foi encontrado: {self.setor}.{self.quadra}.{self.lote}')
-            elif resp['Codigo'] == 0: #zona de uso é sempre o primeiro item
+            elif resp['Codigo'] == 0:
                 zoneamento = resp['Zoneamentos']['Zoneamento']
                 zona_uso = zoneamento[0]
                 cod = zona_uso['CodigoZoneamento'][:2]
+                if cod == 20: #zona de uso é sempre o primeiro item, exceto quando é perímetro de incentivo
+                    zona_uso = zoneamento[1]
+                    cod = zona_uso['CodigoZoneamento'][:2]
                 check = checar_tipologia_empreendimento(cod, tipologia_empreendimento)
                 return build_response(
                     f'Aceita {tipologia_empreendimento}',
