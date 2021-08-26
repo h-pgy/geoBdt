@@ -1,11 +1,11 @@
+import os
 from requests import Session
 from requests.packages import urllib3
 from zeep import Client
 from zeep.cache import InMemoryCache
 from zeep import Settings
 import functools
-from config import p_pwd_cac,p_usr_cac, wsdl_path_intra
-from.custom_transports import LoggerTransport
+from .custom_transports import LoggerTransport
 
 
 def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_timeout = 60):
@@ -34,14 +34,14 @@ def create_client_intranet(auth_headers, wsdl_path_intra, cache = True, cache_ti
     return client
 
 auth_headers = {
-    'p_pwd_cac': p_pwd_cac,
-    'p_usr_cac': p_usr_cac,
+    'p_pwd_cac': os.environ['p_pwd_cac'],
+    'p_usr_cac': os.environ['p_usr_cac'],
     'IdTransacao': 'BDT'
 }
 
 def create_client(auth_headers=auth_headers,
                   create_client_function=create_client_intranet,
-                  wsdl_path = wsdl_path_intra):
+                  wsdl_path = os.environ['wsdl_path_intra']):
     '''Decorator to create soap client. The auth headers and create client function
     parameters should be changed in order to use module in other environments. The
     default parameters are for working inside PMSP intranet on homolog env'''
